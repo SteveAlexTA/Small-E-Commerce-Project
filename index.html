@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RETRO TECH — Vintage Laptops & Retro Computing</title>
+  <meta name="description" content="Explore the history of computing with our collection of classic & retro laptops. From Compaq LTE to IBM ThinkPad — vintage machines that defined an era. RETRO TECH." />
+  <meta name="keywords" content="retro laptop, vintage laptop, classic laptop, Compaq, Toshiba, IBM ThinkPad, ASUS Eee PC, Windows 95, computing history" />
+  <meta property="og:title" content="RETRO TECH — Vintage Laptops" />
+  <meta property="og:description" content="Shop trending laptops at the best prices. Fast shipping, easy returns." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     NAVBAR
+═══════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#" class="logo" id="logo" aria-label="RETRO TECH Home">
+      <div class="logo-icon">💾</div>
+      RETRO<span>TECH</span>
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="#" class="nav-link active">Home</a></li>
+      <li><a href="#trending" class="nav-link">Trending</a></li>
+      <li><a href="#catalog" class="nav-link">All Laptops</a></li>
+      <li><a href="#" class="nav-link">Deals</a></li>
+      <li><a href="#" class="nav-link">Compare</a></li>
+      <li><a href="#" class="nav-link">Support</a></li>
+    </ul>
+
+    <div class="nav-search">
+      <i class="fas fa-search search-icon"></i>
+      <input type="search" id="nav-search-input" placeholder="Search laptops, brands..." aria-label="Search products" />
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn btn-icon" id="wishlist-nav-btn" aria-label="Wishlist" title="Wishlist">
+        <i class="far fa-heart"></i>
+      </button>
+      <button class="btn btn-icon cart-btn" id="cart-nav-btn" aria-label="Shopping cart" title="Cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count">0</span>
+      </button>
+      <button class="btn btn-primary" style="padding:10px 18px;font-size:0.85rem" id="sign-in-btn">
+        Sign In
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+  <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
+  <div class="mobile-nav-drawer">
+    <a href="#" class="logo">
+      <div class="logo-icon">�</div>
+      RETRO<span>TECH</span>
+    </a>
+    <nav class="mobile-nav-links">
+      <a href="#" class="mobile-nav-link">🏠 Home</a>
+      <a href="#trending" class="mobile-nav-link">🔥 Trending</a>
+      <a href="#catalog" class="mobile-nav-link">💻 All Laptops</a>
+      <a href="#" class="mobile-nav-link">🏷️ Deals</a>
+      <a href="#" class="mobile-nav-link">📊 Compare</a>
+      <a href="#" class="mobile-nav-link">💬 Support</a>
+    </nav>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     TRENDING
+═══════════════════════════════ -->
+<section class="trending-section" id="trending" aria-label="Trending laptops">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="label-pill"><i class="fas fa-fire"></i> Hot Right Now</div>
+        <h2 class="section-title">Trending This Week</h2>
+        <p class="section-subtitle">What everyone is buying right now</p>
+      </div>
+      <a href="#catalog" class="view-all-link" id="view-all-trending">
+        View full catalog <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="trending-scroll-wrap">
+      <div class="trending-scroll" id="trending-scroll" role="list" aria-label="Trending products"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     FULL CATALOG
+═══════════════════════════════ -->
+<section class="catalog-section" id="catalog" aria-label="Product catalog">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="label-pill"><i class="fas fa-laptop"></i> Full Catalog</div>
+        <h2 class="section-title">All Laptops</h2>
+        <p class="section-subtitle">Compare, filter & find your match</p>
+      </div>
+    </div>
+
+    <div class="catalog-layout">
+      <!-- ─── Filter Sidebar ─── -->
+      <aside class="filter-sidebar" aria-label="Filters">
+        <div class="filter-box">
+          <div class="filter-box-title">
+            <span><i class="fas fa-sliders"></i> Filters</span>
+            <button class="filter-reset" id="filter-reset">Reset all</button>
+          </div>
+
+          <!-- Brand -->
+          <div class="filter-group">
+            <div class="filter-group-title">Brand</div>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="apple" id="filter-apple"> Apple
+              <span class="filter-count">3</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="asus rog" id="filter-asus-rog"> ASUS ROG
+              <span class="filter-count">2</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="lenovo" id="filter-lenovo"> Lenovo
+              <span class="filter-count">2</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="dell" id="filter-dell"> Dell
+              <span class="filter-count">2</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="microsoft" id="filter-microsoft"> Microsoft
+              <span class="filter-count">1</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="razer" id="filter-razer"> Razer
+              <span class="filter-count">1</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-brand="hp" id="filter-hp"> HP
+              <span class="filter-count">1</span>
+            </label>
+          </div>
+
+          <!-- Price -->
+          <div class="filter-group">
+            <div class="filter-group-title">Max Price</div>
+            <div class="price-range-inputs">
+              <input type="number" value="300" disabled style="opacity:0.5" aria-label="Min price" />
+              <input type="number" id="price-max" value="3000" min="300" max="3000" aria-label="Max price" />
+            </div>
+            <input type="range" class="range-slider" id="price-slider" min="300" max="3000" value="3000" step="50" aria-label="Max price slider" />
+          </div>
+
+          <!-- RAM -->
+          <div class="filter-group">
+            <div class="filter-group-title">Specs Highlight</div>
+            <label class="filter-option">
+              <input type="checkbox" id="filter-rtx"> RTX Graphics
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" id="filter-oled"> OLED Display
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" id="filter-m3"> Apple M3 Chip
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ─── Product Grid ─── -->
+      <div class="catalog-main">
+        <div class="catalog-controls reveal">
+          <div id="results-count" class="results-count">Loading products...</div>
+          <div class="sort-controls">
+            <span class="sort-label">Sort:</span>
+            <select class="sort-select" id="sort-select" aria-label="Sort products">
+              <option value="featured">Featured</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="rating">Top Rated</option>
+              <option value="reviews">Most Reviewed</option>
+            </select>
+            <div class="grid-toggle">
+              <button class="grid-toggle-btn active" data-layout="grid" id="toggle-grid" aria-label="Grid view" title="Grid view">
+                <i class="fas fa-grip"></i>
+              </button>
+              <button class="grid-toggle-btn" data-layout="list" id="toggle-list" aria-label="List view" title="List view">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-grid" id="product-grid" role="list" aria-label="Product listing"></div>
+
+        <div class="load-more-wrap reveal">
+          <button class="btn btn-outline" id="load-more-btn" style="padding:14px 40px">
+            <i class="fas fa-plus"></i> Load More Products
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Toast Container ─── -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<!-- ─── Scripts ─── -->
+<script src="assets/js/main.js"></script>
+</body>
+</html>
