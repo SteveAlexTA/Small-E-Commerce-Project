@@ -304,6 +304,63 @@ function renderTrending() {
       </div>
     </div>
   `).join('');
+  
+  initTrendingScroll();
+}
+
+// ─── Init Trending Scroll Navigation ───
+function initTrendingScroll() {
+  const scroll = $('#trending-scroll');
+  const prevBtn = $('#trending-prev');
+  const nextBtn = $('#trending-next');
+  const indicatorsContainer = $('#trending-indicators');
+  
+  if (!scroll || !prevBtn || !nextBtn || !indicatorsContainer) return;
+  
+  const cards = $$('.trending-card');
+  const cardWidth = 280 + 20; // card width + gap
+  
+  // Create indicators
+  indicatorsContainer.innerHTML = cards.map((_, i) => 
+    `<div class="trending-indicator ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
+  ).join('');
+  
+  // Update indicators based on scroll position
+  const updateIndicators = () => {
+    const scrollLeft = scroll.scrollLeft;
+    const activeIndex = Math.round(scrollLeft / cardWidth);
+    $$('.trending-indicator').forEach((dot, i) => {
+      dot.classList.toggle('active', i === activeIndex);
+    });
+  };
+  
+  // Navigation button handlers
+  const scroll_amount = cardWidth;
+  
+  prevBtn.addEventListener('click', () => {
+    scroll.scrollBy({ left: -scroll_amount, behavior: 'smooth' });
+    setTimeout(updateIndicators, 300);
+  });
+  
+  nextBtn.addEventListener('click', () => {
+    scroll.scrollBy({ left: scroll_amount, behavior: 'smooth' });
+    setTimeout(updateIndicators, 300);
+  });
+  
+  // Indicator click handlers
+  $$('.trending-indicator').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      const index = parseInt(e.target.dataset.index);
+      scroll.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
+      setTimeout(updateIndicators, 300);
+    });
+  });
+  
+  // Update on scroll
+  scroll.addEventListener('scroll', updateIndicators);
+  
+  // Update on window resize
+  window.addEventListener('resize', updateIndicators);
 }
 
 // ─── Render Catalog ───
