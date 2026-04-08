@@ -213,8 +213,8 @@ function badgeHTML(badges) {
 }
 
 // ─── Cart ───
-function saveCart() { localStorage.setItem('retrotech', JSON.stringify(cart)); }
-function saveWish() { localStorage.setItem('retrowish', JSON.stringify(wishlist)); }
+function saveCart() { localStorage.setItem('nexuscart', JSON.stringify(cart)); }
+function saveWish() { localStorage.setItem('nexuswish', JSON.stringify(wishlist)); }
 
 function addToCart(id) {
   const p = products.find(x => x.id === id);
@@ -388,7 +388,20 @@ function renderCatalog() {
   const grid = $('#product-grid');
   if (!grid) return;
   const list = getFilteredProducts();
-  $('#results-count').innerHTML = `Showing <strong>${list.length}</strong> products`;
+  
+  if (list.length === 0) {
+    $('#results-count').innerHTML = `<span style="color:var(--text-muted)">No products match your filters</span>`;
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)">
+        <i class="fas fa-search" style="font-size:3rem;opacity:0.3;margin-bottom:16px;display:block"></i>
+        <h3 style="margin-bottom:8px;color:var(--text-secondary)">No products found</h3>
+        <p>Try adjusting your filters or search terms</p>
+      </div>
+    `;
+    return;
+  }
+  
+  $('#results-count').innerHTML = `Showing <strong>${list.length}</strong> of <strong>${products.length}</strong> products`;
 
   grid.innerHTML = list.map(p => `
     <div class="product-card reveal" data-id="${p.id}">
@@ -434,7 +447,7 @@ function renderCatalog() {
   // Apply staggered reveal
   setTimeout(() => {
     $$('.product-card.reveal').forEach((el, i) => {
-      setTimeout(() => el.classList.add('visible'), i * 60);
+      el.classList.add('visible');
     });
   }, 50);
 }
@@ -471,11 +484,22 @@ function initSort() {
 
 // ─── Grid Toggle ───
 function initGridToggle() {
+  // Restore layout preference
+  const savedLayout = localStorage.getItem('nexuslayout') || 'grid';
+  layoutMode = savedLayout;
+  
+  const grid = $('#product-grid');
+  if (grid) {
+    grid.classList.toggle('list-layout', savedLayout === 'list');
+  }
+  
   $$('.grid-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.layout === savedLayout);
     btn.addEventListener('click', () => {
       $$('.grid-toggle-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       layoutMode = btn.dataset.layout;
+      localStorage.setItem('nexuslayout', layoutMode);
       const grid = $('#product-grid');
       if (grid) {
         grid.classList.toggle('list-layout', layoutMode === 'list');
@@ -531,9 +555,36 @@ function initFilterReset() {
       $$('[data-brand]').forEach(cb => cb.checked = false);
       const slider = $('#price-slider');
       const maxInput = $('#price-max');
-      if (slider) slider.value = 3000;
+      if (slider) {
+        slider.value = 3000;
+        slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) 100%, var(--border) 100%, var(--border) 100%)`;
+      }
       if (maxInput) maxInput.value = 3000;
       renderCatalog();
+      showToast('Filters', 'All filters have been reset', 'fas fa-filter');
+    });
+  }
+}
+
+// ─── Load More ───
+function initLoadMore() {
+  const btn = $('#load-more-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const grid = $('#product-grid');
+      const cards = $$('.product-card');
+      // Simple pagination: show next 3 products
+      const nextCards = $$('.product-card.hidden');
+      if (nextCards.length === 0) {
+        btn.innerHTML = '<i class="fas fa-check"></i> All products loaded';
+        btn.disabled = true;
+        return;
+      }
+      nextCards.slice(0, 3).forEach(card => card.classList.remove('hidden'));
+      if ($$('.product-card.hidden').length === 0) {
+        btn.innerHTML = '<i class="fas fa-check"></i> All products loaded';
+        btn.disabled = true;
+      }
     });
   }
 }
@@ -567,28 +618,39 @@ function initSearch() {
   input.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
       const q = input.value.trim().toLowerCase();
-      if (!q) return;
+      if (!q) {
+        renderCatalog();
+        return;
+      }
+      const filtered = products.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q) ||
+        p.specs.some(s => s.toLowerCase().includes(q))
+      );
+      
+      if (filtered.length === 0) {
+        $('#product-grid').innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)">
+            <i class="fas fa-search" style="font-size:3rem;opacity:0.3;margin-bottom:16px;display:block"></i>
+            <h3 style="margin-bottom:8px;color:var(--text-secondary)">No results for "<em>${q}</em>"</h3>
+            <p>Try different keywords</p>
+          </div>
+        `;
+        $('#results-count').innerHTML = `<span style="color:var(--text-muted)">0 results for "<em>${q}</em>"</span>`;
+      } else {
+        $('#results-count').innerHTML = `<strong>${filtered.length}</strong> results for "<em>${q}</em>"`;
+        const grid = $('#product-grid');
+        grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+        setTimeout(() => {
+          $$('.product-card.reveal').forEach(el => {
+            el.classList.add('visible');
+          });
+        }, 50);
+      }
+      
       const cat = $('#catalog');
       if (cat) {
         cat.scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => {
-          const filtered = products.filter(p =>
-            p.name.toLowerCase().includes(q) ||
-            p.brand.toLowerCase().includes(q) ||
-            p.specs.some(s => s.toLowerCase().includes(q))
-          );
-          const grid = $('#product-grid');
-          if (grid) {
-            const list = filtered.length ? filtered : products;
-            grid.innerHTML = list.map(p => renderProductCard(p)).join('');
-            $('#results-count').innerHTML = `<strong>${filtered.length}</strong> results for "<em>${q}</em>"`;
-            setTimeout(() => {
-              $$('.product-card.reveal').forEach((el, i) => {
-                setTimeout(() => el.classList.add('visible'), i * 60);
-              });
-            }, 50);
-          }
-        }, 600);
       }
     }
   });
@@ -645,7 +707,31 @@ document.addEventListener('DOMContentLoaded', () => {
   initBrandFilters();
   initPriceSlider();
   initFilterReset();
+  initLoadMore();
   initNavbar();
   initMobileNav();
   initSearch();
+  initRevealAnimation();
 });
+
+// ─── Reveal Animation ───
+function initRevealAnimation() {
+  const revealElements = $$('.reveal');
+  if (revealElements.length === 0) return;
+  
+  // Make all reveal elements visible immediately
+  revealElements.forEach(el => {
+    el.classList.add('visible');
+  });
+  
+  // Optional: IntersectionObserver for scroll reveal (advanced)
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  revealElements.forEach(el => observer.observe(el));
+}
