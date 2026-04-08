@@ -72,6 +72,9 @@
       <a href="#" class="mobile-nav-link">🏷️ Deals</a>
       <a href="#" class="mobile-nav-link">📊 Compare</a>
       <a href="#" class="mobile-nav-link">💬 Support</a>
+      <hr style="border:none; border-top:1px solid var(--border); margin: 8px 0;" />
+      <a href="#" class="mobile-nav-link">❤️ Wishlist</a>
+      <a href="#" class="mobile-nav-link">🔐 Sign In</a>
     </nav>
   </div>
 </div>
@@ -121,7 +124,10 @@
     <div class="catalog-layout">
       <!-- ─── Filter Sidebar ─── -->
       <aside class="filter-sidebar" aria-label="Filters">
-        <div class="filter-box">
+        <button class="btn btn-outline" id="mobile-filter-toggle" style="display: none; width: 100%; margin-bottom: 16px;">
+          <i class="fas fa-filter"></i> Show Filters
+        </button>
+        <div class="filter-box" id="filter-box">
           <div class="filter-box-title">
             <span><i class="fas fa-sliders"></i> Filters</span>
             <button class="filter-reset" id="filter-reset">Reset all</button>

@@ -566,6 +566,20 @@ function initFilterReset() {
   }
 }
 
+// ─── Mobile Filter Toggle ───
+function initMobileFilterToggle() {
+  const toggleBtn = $('#mobile-filter-toggle');
+  const filterBox = $('#filter-box');
+  if (toggleBtn && filterBox) {
+    toggleBtn.addEventListener('click', () => {
+      filterBox.classList.toggle('show');
+      toggleBtn.innerHTML = filterBox.classList.contains('show') 
+        ? '<i class="fas fa-times"></i> Hide Filters' 
+        : '<i class="fas fa-filter"></i> Show Filters';
+    });
+  }
+}
+
 // ─── Load More ───
 function initLoadMore() {
   const btn = $('#load-more-btn');
@@ -707,6 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBrandFilters();
   initPriceSlider();
   initFilterReset();
+  initMobileFilterToggle();
   initLoadMore();
   initNavbar();
   initMobileNav();
