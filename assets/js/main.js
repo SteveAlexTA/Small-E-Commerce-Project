@@ -2,7 +2,7 @@
 //   NEXUS TECH — Main JS
 // ═══════════════════════════════════
 
-// ─── Product Data ───
+// Product Data
 const products = [
   {
     id: 1,
