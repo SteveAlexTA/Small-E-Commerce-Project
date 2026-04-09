@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+g<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -36,7 +36,31 @@
 
     <div class="nav-search">
       <i class="fas fa-search search-icon"></i>
-      <input type="search" id="nav-search-input" placeholder="Search laptops, brands..." aria-label="Search products" />
+      <input type="search" id="nav-search-input" placeholder="Search laptops, brands..." aria-label="Search products" aria-expanded="false" aria-controls="search-dropdown" />
+      <button type="button" class="search-clear-btn" id="search-clear-btn" aria-label="Clear search" style="display:none;">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <!-- Search Dropdown -->
+      <div class="search-dropdown" id="search-dropdown" role="listbox" aria-label="Search suggestions">
+        <!-- Recent Searches -->
+        <div class="dropdown-section" id="recent-section" style="display:none;">
+          <div class="dropdown-title">Recent</div>
+          <div id="recent-items"></div>
+        </div>
+        
+        <!-- Trending -->
+        <div class="dropdown-section" id="trending-section" style="display:none;">
+          <div class="dropdown-title">Trending</div>
+          <div id="trending-items"></div>
+        </div>
+        
+        <!-- Results -->
+        <div class="dropdown-section" id="results-section" style="display:none;">
+          <div class="dropdown-title">Products</div>
+          <div id="results-items"></div>
+        </div>
+      </div>
     </div>
 
     <div class="nav-actions">
@@ -72,9 +96,6 @@
       <a href="#" class="mobile-nav-link">🏷️ Deals</a>
       <a href="#" class="mobile-nav-link">📊 Compare</a>
       <a href="#" class="mobile-nav-link">💬 Support</a>
-      <hr style="border:none; border-top:1px solid var(--border); margin: 8px 0;" />
-      <a href="#" class="mobile-nav-link">❤️ Wishlist</a>
-      <a href="#" class="mobile-nav-link">🔐 Sign In</a>
     </nav>
   </div>
 </div>
@@ -124,10 +145,7 @@
     <div class="catalog-layout">
       <!-- ─── Filter Sidebar ─── -->
       <aside class="filter-sidebar" aria-label="Filters">
-        <button class="btn btn-outline" id="mobile-filter-toggle" style="display: none; width: 100%; margin-bottom: 16px;">
-          <i class="fas fa-filter"></i> Show Filters
-        </button>
-        <div class="filter-box" id="filter-box">
+        <div class="filter-box">
           <div class="filter-box-title">
             <span><i class="fas fa-sliders"></i> Filters</span>
             <button class="filter-reset" id="filter-reset">Reset all</button>

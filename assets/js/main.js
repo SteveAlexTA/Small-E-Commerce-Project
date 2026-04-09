@@ -461,46 +461,256 @@ function initMobileNav() {
 // ─── Search ───
 function initSearch() {
   const input = $('#nav-search-input');
+  const dropdown = $('#search-dropdown');
+  const clearBtn = $('#search-clear-btn');
+  let searchTimeout;
+  let selectedIndex = -1;
+
   if (!input) return;
-  input.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
-      const q = input.value.trim().toLowerCase();
-      if (!q) {
-        renderCatalog();
-        return;
-      }
-      const filtered = products.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.specs.some(s => s.toLowerCase().includes(q))
-      );
 
-      if (filtered.length === 0) {
-        $('#product-grid').innerHTML = `
-          <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)">
-            <i class="fas fa-search" style="font-size:3rem;opacity:0.3;margin-bottom:16px;display:block"></i>
-            <h3 style="margin-bottom:8px;color:var(--text-secondary)">No results for "<em>${q}</em>"</h3>
-            <p>Try different keywords</p>
-          </div>
-        `;
-        $('#results-count').innerHTML = `<span style="color:var(--text-muted)">0 results for "<em>${q}</em>"</span>`;
+  // Load recent searches from localStorage
+  const recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+
+  // Clear button functionality
+  clearBtn?.addEventListener('click', () => {
+    input.value = '';
+    clearBtn.style.display = 'none';
+    dropdown.classList.remove('active');
+    input.focus();
+  });
+
+  // Input handling
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    
+    if (q.length > 0) {
+      clearBtn.style.display = 'flex';
+    } else {
+      clearBtn.style.display = 'none';
+    }
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (q.length === 0) {
+        showRecentsAndTrending();
       } else {
-        $('#results-count').innerHTML = `<strong>${filtered.length}</strong> results for "<em>${q}</em>"`;
-        const grid = $('#product-grid');
-        grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
-        setTimeout(() => {
-          $$('.product-card.reveal').forEach(el => {
-            el.classList.add('visible');
-          });
-        }, 50);
+        performSearch(q.toLowerCase());
       }
+    }, 300);
+  });
 
-      const cat = $('#catalog');
-      if (cat) {
-        cat.scrollIntoView({ behavior: 'smooth' });
-      }
+  // Focus to show recents
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length === 0) {
+      showRecentsAndTrending();
+    }
+    dropdown.classList.add('active');
+    input.setAttribute('aria-expanded', 'true');
+  });
+
+  // Keyboard navigation
+  input.addEventListener('keydown', (e) => {
+    const items = $$('.dropdown-item');
+    
+    switch(e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        updateSelection(items);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection(items);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+          items[selectedIndex].click();
+        } else {
+          performFullSearch(input.value.trim());
+        }
+        break;
+      case 'Escape':
+        dropdown.classList.remove('active');
+        input.setAttribute('aria-expanded', 'false');
+        break;
     }
   });
+
+  // Click outside to close
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) {
+      dropdown.classList.remove('active');
+      input.setAttribute('aria-expanded', 'false');
+      selectedIndex = -1;
+    }
+  });
+
+  function updateSelection(items) {
+    items.forEach((item, idx) => {
+      if (idx === selectedIndex) {
+        item.classList.add('active');
+        item.scrollIntoView({ block: 'nearest' });
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  }
+
+  function showRecentsAndTrending() {
+    const recentSection = $('#recent-section');
+    const trendingSection = $('#trending-section');
+    const resultsSection = $('#results-section');
+    
+    resultsSection.style.display = 'none';
+    selectedIndex = -1;
+
+    // Show recent searches
+    if (recentSearches.length > 0) {
+      const recentItems = $('#recent-items');
+      recentItems.innerHTML = recentSearches.slice(0, 3).map((q, idx) => `
+        <div class="dropdown-item" data-search="${q}" data-index="${idx}">
+          <div class="dropdown-item-icon"><i class="far fa-clock"></i></div>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">${q}</div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add click listeners
+      recentItems.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          performFullSearch(item.dataset.search);
+        });
+      });
+      
+      recentSection.style.display = 'block';
+    } else {
+      recentSection.style.display = 'none';
+    }
+
+    // Show trending - dynamically from products marked as trending
+    const trendingItems = $('#trending-items');
+    const trendingProducts = products.filter(p => p.trending).slice(0, 3);
+    const trending = trendingProducts.map(p => ({
+      title: p.name,
+      icon: p.category === 'gaming' ? '🎮' : p.category === '2in1' ? '⚙️' : '💻'
+    }));
+    trendingItems.innerHTML = trending.map((t, idx) => `
+      <div class="dropdown-item" data-search="${t.title}" data-index="${idx}">
+        <div class="dropdown-item-icon">${t.icon}</div>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">${t.title}</div>
+        </div>
+      </div>
+    `).join('');
+    
+    // Add click listeners
+    trendingItems.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        performFullSearch(item.dataset.search);
+      });
+    });
+    
+    trendingSection.style.display = 'block';
+  }
+
+  function performSearch(q) {
+    q = q.toLowerCase();
+    selectedIndex = -1;
+    const resultsSection = $('#results-section');
+    const recentSection = $('#recent-section');
+    const trendingSection = $('#trending-section');
+
+    recentSection.style.display = 'none';
+    trendingSection.style.display = 'none';
+
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      (p.specs && p.specs.some(s => s.toLowerCase().includes(q)))
+    ).slice(0, 4);
+
+    if (filtered.length > 0) {
+      const resultsItems = $('#results-items');
+      resultsItems.innerHTML = filtered.map((p, idx) => `
+        <div class="dropdown-item" data-product-id="${p.id}" data-index="${idx}">
+          <div class="dropdown-item-icon">💻</div>
+          <div class="dropdown-item-content">
+            <div class="dropdown-item-title">${p.name}</div>
+            <div class="dropdown-item-subtitle">${p.brand} • ${fmt(p.price)}</div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add click listeners
+      resultsItems.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productName = item.querySelector('.dropdown-item-title').textContent;
+          performFullSearch(productName);
+        });
+      });
+      
+      resultsSection.style.display = 'block';
+    } else {
+      resultsSection.style.display = 'none';
+    }
+  }
+
+  function performFullSearch(q) {
+    q = q.toLowerCase();
+    if (!q.trim()) {
+      renderCatalog();
+      return;
+    }
+
+    input.value = q;
+
+    // Add to recent searches
+    if (!recentSearches.includes(q)) {
+      recentSearches.unshift(q);
+      recentSearches.splice(5);
+      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    }
+
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      (p.specs && p.specs.some(s => s.toLowerCase().includes(q)))
+    );
+
+    if (filtered.length === 0) {
+      $('#product-grid').innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)">
+          <i class="fas fa-search" style="font-size:3rem;opacity:0.3;margin-bottom:16px;display:block"></i>
+          <h3 style="margin-bottom:8px;color:var(--text-secondary)">No results for "<em>${q}</em>"</h3>
+          <p>Try different keywords</p>
+        </div>
+      `;
+      $('#results-count').innerHTML = `<span style="color:var(--text-muted)">0 results for "<em>${q}</em>"</span>`;
+    } else {
+      $('#results-count').innerHTML = `<strong>${filtered.length}</strong> results for "<em>${q}</em>"`;
+      const grid = $('#product-grid');
+      grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+      setTimeout(() => {
+        $$('.product-card.reveal').forEach(el => {
+          el.classList.add('visible');
+        });
+      }, 50);
+    }
+
+    dropdown.classList.remove('active');
+    input.setAttribute('aria-expanded', 'false');
+
+    const cat = $('#catalog');
+    if (cat) {
+      cat.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
 }
 
 function renderProductCard(p) {
