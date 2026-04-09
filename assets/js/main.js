@@ -2,7 +2,7 @@
 //   NEXUS TECH 
 // ═══════════════════════════════════
 
-// Product Data - Loaded from JSON
+// Product data loaded from JSON
 let products = [];
 
 // Load products from JSON file
