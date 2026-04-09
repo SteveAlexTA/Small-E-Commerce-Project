@@ -2,189 +2,22 @@
 //   NEXUS TECH 
 // ═══════════════════════════════════
 
-// Product Data
-const products = [
-  {
-    id: 1,
-    brand: "Apple",
-    name: "MacBook Air M3 — 15\" Midnight",
-    img: "assets/images/laptop_macbook.png",
-    specs: ["M3 Chip", "16GB", "512GB SSD"],
-    rating: 4.9,
-    reviews: 2841,
-    price: 1299,
-    oldPrice: 1499,
-    badges: ["bestseller"],
-    category: "ultrabook",
-    trending: true,
-    rank: 1,
-  },
-  {
-    id: 2,
-    brand: "ASUS ROG",
-    name: "ROG Strix G16 — Eclipse Grey",
-    img: "assets/images/laptop_gaming.png",
-    specs: ["RTX 4060", "32GB", "1TB SSD"],
-    rating: 4.8,
-    reviews: 1562,
-    price: 1549,
-    oldPrice: 1799,
-    badges: ["hot", "sale"],
-    category: "gaming",
-    trending: true,
-    rank: 2,
-  },
-  {
-    id: 3,
-    brand: "Lenovo",
-    name: "ThinkPad X1 Carbon Gen 12",
-    img: "assets/images/laptop_business.png",
-    specs: ["Core Ultra 7", "32GB", "1TB SSD"],
-    rating: 4.7,
-    reviews: 986,
-    price: 1199,
-    oldPrice: null,
-    badges: ["new"],
-    category: "business",
-    trending: true,
-    rank: 3,
-  },
-  {
-    id: 4,
-    brand: "Microsoft",
-    name: "Surface Pro 10 — Sapphire",
-    img: "assets/images/laptop_2in1.png",
-    specs: ["Core Ultra 5", "16GB", "256GB SSD"],
-    rating: 4.6,
-    reviews: 734,
-    price: 999,
-    oldPrice: 1149,
-    badges: ["sale"],
-    category: "2in1",
-    trending: true,
-    rank: 4,
-  },
-  {
-    id: 5,
-    brand: "Dell",
-    name: "XPS 13 Plus — Graphite",
-    img: "assets/images/laptop_ultrabook.png",
-    specs: ["Core Ultra 7", "16GB", "512GB SSD"],
-    rating: 4.7,
-    reviews: 1203,
-    price: 1099,
-    oldPrice: 1299,
-    badges: ["bestseller"],
-    category: "ultrabook",
-    trending: true,
-    rank: 5,
-  },
-  {
-    id: 6,
-    brand: "HP",
-    name: "Spectre x360 14 — Nightfall Black",
-    img: "assets/images/laptop_macbook.png",
-    specs: ["Core Ultra 7", "32GB", "1TB SSD"],
-    rating: 4.6,
-    reviews: 877,
-    price: 1349,
-    oldPrice: 1499,
-    badges: ["new", "sale"],
-    category: "2in1",
-    trending: false,
-    rank: 6,
-  },
-  {
-    id: 7,
-    brand: "Razer",
-    name: "Blade 16 — Mercury White",
-    img: "assets/images/laptop_gaming.png",
-    specs: ["RTX 4080", "32GB", "2TB SSD"],
-    rating: 4.9,
-    reviews: 643,
-    price: 2499,
-    oldPrice: 2799,
-    badges: ["hot"],
-    category: "gaming",
-    trending: false,
-    rank: 7,
-  },
-  {
-    id: 8,
-    brand: "Acer",
-    name: "Swift Edge 16 — Olivine Black",
-    img: "assets/images/laptop_business.png",
-    specs: ["Ryzen 7", "16GB", "1TB SSD"],
-    rating: 4.4,
-    reviews: 421,
-    price: 849,
-    oldPrice: 999,
-    badges: ["sale"],
-    category: "ultrabook",
-    trending: false,
-    rank: 8,
-  },
-  {
-    id: 9,
-    brand: "Samsung",
-    name: "Galaxy Book4 Ultra — Moonstone Gray",
-    img: "assets/images/laptop_ultrabook.png",
-    specs: ["Core Ultra 9", "32GB", "1TB SSD"],
-    rating: 4.8,
-    reviews: 512,
-    price: 1799,
-    oldPrice: null,
-    badges: ["new"],
-    category: "business",
-    trending: false,
-    rank: 9,
-  },
-  {
-    id: 10,
-    brand: "LG",
-    name: "Gram 17 — White",
-    img: "assets/images/laptop_2in1.png",
-    specs: ["Core Ultra 5", "16GB", "512GB SSD"],
-    rating: 4.5,
-    reviews: 398,
-    price: 979,
-    oldPrice: 1099,
-    badges: ["sale"],
-    category: "ultrabook",
-    trending: false,
-    rank: 10,
-  },
-  {
-    id: 11,
-    brand: "ASUS",
-    name: "Vivobook Pro 16X OLED",
-    img: "assets/images/laptop_gaming.png",
-    specs: ["RTX 4060", "24GB", "1TB SSD"],
-    rating: 4.6,
-    reviews: 714,
-    price: 1199,
-    oldPrice: 1399,
-    badges: ["hot", "sale"],
-    category: "gaming",
-    trending: false,
-    rank: 11,
-  },
-  {
-    id: 12,
-    brand: "MSI",
-    name: "Stealth 16 Mercedes-AMG",
-    img: "assets/images/laptop_business.png",
-    specs: ["RTX 4070", "32GB", "2TB SSD"],
-    rating: 4.7,
-    reviews: 287,
-    price: 2199,
-    oldPrice: 2499,
-    badges: ["new", "hot"],
-    category: "gaming",
-    trending: false,
-    rank: 12,
-  },
-];
+// Product Data - Loaded from JSON
+let products = [];
+
+// Load products from JSON file
+async function loadProducts() {
+  try {
+    const response = await fetch('api/products.json');
+    if (!response.ok) throw new Error('Failed to load products');
+    products = await response.json();
+    console.log(`✓ Loaded ${products.length} products`);
+    renderAll();
+  } catch (error) {
+    console.error('Error loading products:', error);
+    showToast('Error', 'Failed to load products', 'fas fa-exclamation-circle');
+  }
+}
 
 // ─── State ───
 let cart = JSON.parse(localStorage.getItem('nexuscart')) || [];
@@ -304,7 +137,7 @@ function renderTrending() {
       </div>
     </div>
   `).join('');
-  
+
   initTrendingScroll();
 }
 
@@ -314,17 +147,17 @@ function initTrendingScroll() {
   const prevBtn = $('#trending-prev');
   const nextBtn = $('#trending-next');
   const indicatorsContainer = $('#trending-indicators');
-  
+
   if (!scroll || !prevBtn || !nextBtn || !indicatorsContainer) return;
-  
+
   const cards = $$('.trending-card');
   const cardWidth = 280 + 20; // card width + gap
-  
+
   // Create indicators
-  indicatorsContainer.innerHTML = cards.map((_, i) => 
+  indicatorsContainer.innerHTML = cards.map((_, i) =>
     `<div class="trending-indicator ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
   ).join('');
-  
+
   // Update indicators based on scroll position
   const updateIndicators = () => {
     const scrollLeft = scroll.scrollLeft;
@@ -333,20 +166,20 @@ function initTrendingScroll() {
       dot.classList.toggle('active', i === activeIndex);
     });
   };
-  
+
   // Navigation button handlers
   const scroll_amount = cardWidth;
-  
+
   prevBtn.addEventListener('click', () => {
     scroll.scrollBy({ left: -scroll_amount, behavior: 'smooth' });
     setTimeout(updateIndicators, 300);
   });
-  
+
   nextBtn.addEventListener('click', () => {
     scroll.scrollBy({ left: scroll_amount, behavior: 'smooth' });
     setTimeout(updateIndicators, 300);
   });
-  
+
   // Indicator click handlers
   $$('.trending-indicator').forEach(dot => {
     dot.addEventListener('click', (e) => {
@@ -355,10 +188,10 @@ function initTrendingScroll() {
       setTimeout(updateIndicators, 300);
     });
   });
-  
+
   // Update on scroll
   scroll.addEventListener('scroll', updateIndicators);
-  
+
   // Update on window resize
   window.addEventListener('resize', updateIndicators);
 }
@@ -388,7 +221,7 @@ function renderCatalog() {
   const grid = $('#product-grid');
   if (!grid) return;
   const list = getFilteredProducts();
-  
+
   if (list.length === 0) {
     $('#results-count').innerHTML = `<span style="color:var(--text-muted)">No products match your filters</span>`;
     grid.innerHTML = `
@@ -400,7 +233,7 @@ function renderCatalog() {
     `;
     return;
   }
-  
+
   $('#results-count').innerHTML = `Showing <strong>${list.length}</strong> of <strong>${products.length}</strong> products`;
 
   grid.innerHTML = list.map(p => `
@@ -487,12 +320,12 @@ function initGridToggle() {
   // Restore layout preference
   const savedLayout = localStorage.getItem('nexuslayout') || 'grid';
   layoutMode = savedLayout;
-  
+
   const grid = $('#product-grid');
   if (grid) {
     grid.classList.toggle('list-layout', savedLayout === 'list');
   }
-  
+
   $$('.grid-toggle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.layout === savedLayout);
     btn.addEventListener('click', () => {
@@ -573,8 +406,8 @@ function initMobileFilterToggle() {
   if (toggleBtn && filterBox) {
     toggleBtn.addEventListener('click', () => {
       filterBox.classList.toggle('show');
-      toggleBtn.innerHTML = filterBox.classList.contains('show') 
-        ? '<i class="fas fa-times"></i> Hide Filters' 
+      toggleBtn.innerHTML = filterBox.classList.contains('show')
+        ? '<i class="fas fa-times"></i> Hide Filters'
         : '<i class="fas fa-filter"></i> Show Filters';
     });
   }
@@ -641,7 +474,7 @@ function initSearch() {
         p.brand.toLowerCase().includes(q) ||
         p.specs.some(s => s.toLowerCase().includes(q))
       );
-      
+
       if (filtered.length === 0) {
         $('#product-grid').innerHTML = `
           <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)">
@@ -661,7 +494,7 @@ function initSearch() {
           });
         }, 50);
       }
-      
+
       const cat = $('#catalog');
       if (cat) {
         cat.scrollIntoView({ behavior: 'smooth' });
@@ -711,7 +544,7 @@ function renderProductCard(p) {
 }
 
 // ─── Init ───
-document.addEventListener('DOMContentLoaded', () => {
+function renderAll() {
   updateCartCount();
   renderTrending();
   renderCatalog();
@@ -727,18 +560,22 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initSearch();
   initRevealAnimation();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadProducts();
 });
 
 // ─── Reveal Animation ───
 function initRevealAnimation() {
   const revealElements = $$('.reveal');
   if (revealElements.length === 0) return;
-  
+
   // Make all reveal elements visible immediately
   revealElements.forEach(el => {
     el.classList.add('visible');
   });
-  
+
   // Optional: IntersectionObserver for scroll reveal (advanced)
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -747,6 +584,6 @@ function initRevealAnimation() {
       }
     });
   }, { threshold: 0.1 });
-  
+
   revealElements.forEach(el => observer.observe(el));
 }
