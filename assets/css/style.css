@@ -81,7 +81,33 @@ button {
 input,
 select {
   font-family: inherit;
+  font-size: 16px;
 }
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Disable zoom on input focus for better UX */
+body {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+button,
+input,
+a {
+  -webkit-user-select: text;
+}
+
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar {
@@ -1712,5 +1738,64 @@ select {
 
   .product-card-img-wrap {
     height: 140px;
+  }
+
+  /* Mobile Search Improvements */
+  .nav-search {
+    max-width: 240px;
+  }
+
+  .nav-search input {
+    height: 44px;
+    font-size: 16px;
+    padding: 0 16px 0 42px;
+  }
+
+  .search-clear-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .search-dropdown {
+    max-height: 400px;
+    max-width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .search-dropdown.active {
+    transform: translateX(-50%);
+  }
+
+  .dropdown-item {
+    padding: 14px 12px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-item:active,
+  .dropdown-item:hover {
+    background: rgba(108, 99, 255, 0.15);
+    padding-left: 16px;
+  }
+
+  .dropdown-item-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .dropdown-item-title {
+    font-size: 0.95rem;
+  }
+
+  .dropdown-item-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Ensure search input has proper touch targets */
+  .nav-search input:focus {
+    font-size: 16px;
   }
 }

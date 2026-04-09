@@ -465,6 +465,7 @@ function initSearch() {
   const clearBtn = $('#search-clear-btn');
   let searchTimeout;
   let selectedIndex = -1;
+  let touchInDropdown = false;
 
   if (!input) return;
 
@@ -538,14 +539,47 @@ function initSearch() {
     }
   });
 
-  // Click outside to close
+  // Dropdown touch tracking (for mobile)
+  dropdown.addEventListener('touchstart', () => {
+    touchInDropdown = true;
+  });
+
+  dropdown.addEventListener('touchend', () => {
+    touchInDropdown = false;
+  });
+
+  // Click/Touch outside to close (with mobile support)
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav-search')) {
+    if (!e.target.closest('.nav-search') && !touchInDropdown) {
       dropdown.classList.remove('active');
       input.setAttribute('aria-expanded', 'false');
       selectedIndex = -1;
     }
   });
+
+  // Also handle touchend for better mobile support
+  document.addEventListener('touchend', (e) => {
+    if (!e.target.closest('.nav-search')) {
+      // Add small delay to allow dropdown item click to register
+      setTimeout(() => {
+        if (!touchInDropdown) {
+          dropdown.classList.remove('active');
+          input.setAttribute('aria-expanded', 'false');
+          selectedIndex = -1;
+        }
+      }, 50);
+    }
+  });
+
+  // Helper function to add click/touch listener to dropdown items
+  const addDropdownItemListener = (item, callback) => {
+    const handler = (e) => {
+      e.stopPropagation();
+      callback();
+    };
+    item.addEventListener('click', handler);
+    item.addEventListener('touchend', handler);
+  };
 
   function updateSelection(items) {
     items.forEach((item, idx) => {
@@ -578,10 +612,9 @@ function initSearch() {
         </div>
       `).join('');
       
-      // Add click listeners
+      // Add click/touch listeners
       recentItems.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
+        addDropdownItemListener(item, () => {
           performFullSearch(item.dataset.search);
         });
       });
@@ -607,10 +640,9 @@ function initSearch() {
       </div>
     `).join('');
     
-    // Add click listeners
+    // Add click/touch listeners
     trendingItems.querySelectorAll('.dropdown-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
+      addDropdownItemListener(item, () => {
         performFullSearch(item.dataset.search);
       });
     });
@@ -646,10 +678,9 @@ function initSearch() {
         </div>
       `).join('');
       
-      // Add click listeners
+      // Add click/touch listeners
       resultsItems.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
+        addDropdownItemListener(item, () => {
           const productName = item.querySelector('.dropdown-item-title').textContent;
           performFullSearch(productName);
         });
