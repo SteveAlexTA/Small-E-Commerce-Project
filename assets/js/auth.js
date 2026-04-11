@@ -157,6 +157,11 @@ function initAuth() {
       return;
     }
 
+    if (user.status === 'deactivated') {
+      if (typeof showToast === 'function') showToast('Account Deactivated', 'Your account has been deactivated. Please contact support.', 'fas fa-user-lock');
+      return;
+    }
+
     if (user.status !== 'approved') {
       if (typeof showToast === 'function') showToast('Account Pending', 'Your account is pending admin approval.', 'fas fa-clock');
       return;
@@ -259,22 +264,29 @@ function renderAdminDashboard() {
       statusHTML = `<span class="status-badge status-approved">Active</span>`;
     } else if (user.status === 'rejected') {
       statusHTML = `<span class="status-badge status-rejected">Rejected</span>`;
+    } else if (user.status === 'deactivated') {
+      statusHTML = `<span class="status-badge status-deactivated">Deactivated</span>`;
     } else {
       statusHTML = `<span class="status-badge status-pending">Pending</span>`;
     }
     
     // Action Button
-    let actionHTML = '';
+    let actionHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;">`;
     if (user.status === 'pending') {
-      actionHTML = `
-        <div style="display:flex;gap:6px;">
-          <button class="btn-approve" onclick="approveUser(${user.id})">Approve</button>
-          <button class="btn-reject" onclick="rejectUser(${user.id})">Reject</button>
-        </div>
+      actionHTML += `
+        <button class="btn-approve" onclick="approveUser(${user.id})">Approve</button>
+        <button class="btn-reject" onclick="rejectUser(${user.id})">Reject</button>
       `;
-    } else {
-      actionHTML = `<span style="color:var(--text-muted);font-size:0.8rem;">None</span>`;
+    } else if (user.status === 'approved') {
+      actionHTML += `
+        <button class="btn-deactivate" onclick="deactivateUser(${user.id})">Deactivate</button>
+      `;
+    } else if (user.status === 'deactivated') {
+      actionHTML += `
+        <button class="btn-approve" onclick="approveUser(${user.id})">Activate</button>
+      `;
     }
+    actionHTML += `<button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button></div>`;
     
     tr.innerHTML = `
       <td style="font-weight:500;">${user.name}</td>
@@ -306,6 +318,25 @@ window.rejectUser = function(userId) {
     localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
     renderAdminDashboard();
     if (typeof showToast === 'function') showToast('Rejected', 'User registration rejected.', 'fas fa-ban');
+  }
+}
+
+window.deactivateUser = function(userId) {
+  const userIndex = usersDb.findIndex(u => u.id === userId);
+  if (userIndex !== -1) {
+    usersDb[userIndex].status = 'deactivated';
+    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
+    renderAdminDashboard();
+    if (typeof showToast === 'function') showToast('Deactivated', 'User account deactivated.', 'fas fa-user-lock');
+  }
+}
+
+window.deleteUser = function(userId) {
+  if(confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) {
+    usersDb = usersDb.filter(u => u.id !== userId);
+    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
+    renderAdminDashboard();
+    if (typeof showToast === 'function') showToast('Deleted', 'User account removed.', 'fas fa-trash-alt');
   }
 }
 
