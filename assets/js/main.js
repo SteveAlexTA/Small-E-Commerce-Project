@@ -50,6 +50,11 @@ function saveCart() { localStorage.setItem('nexuscart', JSON.stringify(cart)); }
 function saveWish() { localStorage.setItem('nexuswish', JSON.stringify(wishlist)); }
 
 function addToCart(id) {
+  if (!currentUser) {
+    showToast('Authentication Required', 'Please sign in to buy products.', 'fas fa-lock');
+    openAuthModal();
+    return;
+  }
   const p = products.find(x => x.id === id);
   if (!p) return;
   const existing = cart.find(x => x.id === id);
@@ -812,6 +817,7 @@ function renderAll() {
   initSearch();
   initThemeToggle();
   initRevealAnimation();
+  initAuth();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

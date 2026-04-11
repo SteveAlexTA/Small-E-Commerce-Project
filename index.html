@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 <body>
 
@@ -241,10 +242,86 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════
+     AUTH MODAL
+═══════════════════════════════ -->
+<div class="auth-modal" id="auth-modal" aria-hidden="true">
+  <div class="auth-modal-backdrop" id="auth-modal-backdrop"></div>
+  <div class="auth-modal-content">
+    <button class="auth-close-btn" id="auth-close-btn" aria-label="Close auth modal"><i class="fas fa-times"></i></button>
+    
+    <div class="auth-header">
+      <div class="logo" style="justify-content:center;margin-bottom:12px;">
+        <div class="logo-icon" style="width:30px;height:30px;font-size:0.8rem">💻</div>
+        NEXUS<span style="font-size:1.2rem">TECH</span>
+      </div>
+      <h3 class="auth-title" id="auth-title">Sign in to your account</h3>
+      <p class="auth-subtitle" id="auth-subtitle">Welcome back! Please enter your details.</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="auth-form active">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <div class="input-icon-wrap">
+          <i class="far fa-envelope"></i>
+          <input type="email" id="login-email" placeholder="Enter your email" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display:flex;justify-content:space-between;width:100%;">
+          <label for="login-pwd">Password</label>
+          <a href="#" class="auth-link" style="font-size:0.75rem">Forgot password?</a>
+        </div>
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="login-pwd" placeholder="••••••••" required />
+          <button type="button" class="pwd-toggle-btn" tabindex="-1"><i class="far fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;width:100%">Sign In</button>
+      <div class="auth-switch">
+        Don't have an account? <a href="#" id="go-to-register" class="auth-link">Sign up</a>
+      </div>
+    </form>
+
+    <!-- Register Form -->
+    <form id="register-form" class="auth-form">
+      <div class="form-group">
+        <label for="reg-name">Full Name</label>
+        <div class="input-icon-wrap">
+          <i class="far fa-user"></i>
+          <input type="text" id="reg-name" placeholder="John Doe" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email</label>
+        <div class="input-icon-wrap">
+          <i class="far fa-envelope"></i>
+          <input type="email" id="reg-email" placeholder="Enter your email" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-pwd">Password</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="reg-pwd" placeholder="Create a password" required minlength="6" />
+          <button type="button" class="pwd-toggle-btn" tabindex="-1"><i class="far fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;width:100%">Create Account</button>
+      <div class="auth-switch">
+        Already have an account? <a href="#" id="go-to-login" class="auth-link">Log in</a>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ─── Toast Container ─── -->
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <!-- ─── Scripts ─── -->
+<script src="assets/js/auth.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
