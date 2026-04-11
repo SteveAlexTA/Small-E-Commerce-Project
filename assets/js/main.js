@@ -361,20 +361,30 @@ function initPriceSlider() {
   const slider = $('#price-slider');
   const maxInput = $('#price-max');
   if (!slider || !maxInput) return;
+  // initialize values and visual track
+  const min = parseInt(slider.min) || 300;
+  const max = parseInt(slider.max) || 3000;
+  const initVal = parseInt(slider.value) || max;
+  maxInput.value = initVal;
+  activeFilters.priceMax = initVal;
+  const initPct = ((initVal - min) / (max - min)) * 100;
+  slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${initPct}%, var(--bg-card) ${initPct}%, var(--bg-card) 100%)`;
 
   slider.addEventListener('input', () => {
     const val = parseInt(slider.value);
     maxInput.value = val;
     activeFilters.priceMax = val;
-    const pct = ((val - 300) / (3000 - 300)) * 100;
-    slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
+    const pct = ((val - min) / (max - min)) * 100;
+    slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--bg-card) ${pct}%, var(--bg-card) 100%)`;
     renderCatalog();
   });
 
   maxInput.addEventListener('change', () => {
-    const val = Math.min(Math.max(parseInt(maxInput.value) || 3000, 300), 3000);
+    const val = Math.min(Math.max(parseInt(maxInput.value) || max, min), max);
     slider.value = val;
     activeFilters.priceMax = val;
+    const pct = ((val - min) / (max - min)) * 100;
+    slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--bg-card) ${pct}%, var(--bg-card) 100%)`;
     renderCatalog();
   });
 }
@@ -390,7 +400,7 @@ function initFilterReset() {
       const maxInput = $('#price-max');
       if (slider) {
         slider.value = 3000;
-        slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) 100%, var(--border) 100%, var(--border) 100%)`;
+        slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) 100%, var(--bg-card) 100%, var(--bg-card) 100%)`;
       }
       if (maxInput) maxInput.value = 3000;
       renderCatalog();
@@ -800,12 +810,44 @@ function renderAll() {
   initNavbar();
   initMobileNav();
   initSearch();
+  initThemeToggle();
   initRevealAnimation();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadProducts();
 });
+
+// ─── Theme Toggle ───
+function initThemeToggle() {
+  const btn = $('#theme-toggle');
+  const icon = $('#theme-icon');
+  if (!btn || !icon) return;
+
+  // Restore saved theme
+  const saved = localStorage.getItem('nexustheme') || 'dark';
+  applyTheme(saved);
+
+  btn.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('nexustheme', next);
+  });
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    // Animate icon swap
+    icon.style.transform = 'rotate(180deg) scale(0)';
+    icon.style.opacity = '0';
+    setTimeout(() => {
+      icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+      icon.style.transform = 'rotate(0deg) scale(1)';
+      icon.style.opacity = '1';
+    }, 200);
+    btn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  }
+}
 
 // ─── Reveal Animation ───
 function initRevealAnimation() {

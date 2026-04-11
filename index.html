@@ -1,4 +1,4 @@
-g<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -64,6 +64,9 @@ g<!DOCTYPE html>
     </div>
 
     <div class="nav-actions">
+      <button class="btn btn-icon" id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">
+        <i class="fas fa-moon" id="theme-icon"></i>
+      </button>
       <button class="btn btn-icon" id="wishlist-nav-btn" aria-label="Wishlist" title="Wishlist">
         <i class="far fa-heart"></i>
       </button>
@@ -145,7 +148,11 @@ g<!DOCTYPE html>
     <div class="catalog-layout">
       <!-- ─── Filter Sidebar ─── -->
       <aside class="filter-sidebar" aria-label="Filters">
-        <div class="filter-box">
+        <!-- Mobile filter toggle -->
+        <button class="btn btn-outline" id="mobile-filter-toggle" style="display:none;width:100%;margin-bottom:12px;justify-content:center;gap:8px">
+          <i class="fas fa-sliders"></i> Show Filters
+        </button>
+        <div class="filter-box" id="filter-box">
           <div class="filter-box-title">
             <span><i class="fas fa-sliders"></i> Filters</span>
             <button class="filter-reset" id="filter-reset">Reset all</button>
@@ -194,19 +201,7 @@ g<!DOCTYPE html>
             <input type="range" class="range-slider" id="price-slider" min="300" max="3000" value="3000" step="50" aria-label="Max price slider" />
           </div>
 
-          <!-- RAM -->
-          <div class="filter-group">
-            <div class="filter-group-title">Specs Highlight</div>
-            <label class="filter-option">
-              <input type="checkbox" id="filter-rtx"> RTX Graphics
-            </label>
-            <label class="filter-option">
-              <input type="checkbox" id="filter-oled"> OLED Display
-            </label>
-            <label class="filter-option">
-              <input type="checkbox" id="filter-m3"> Apple M3 Chip
-            </label>
-          </div>
+          <!-- Specs Highlight removed -->
         </div>
       </aside>
 

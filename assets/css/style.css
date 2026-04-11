@@ -36,6 +36,83 @@
   --nav-height: 72px;
 }
 
+/* ─── Light Mode ─── */
+[data-theme="light"] {
+  --bg-base: #f0f2ff;
+  --bg-surface: #e8eaf6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f5ff;
+  --bg-glass: rgba(108, 99, 255, 0.06);
+  --border: rgba(108, 99, 255, 0.15);
+  --border-hover: rgba(108, 99, 255, 0.5);
+  --text-primary: #0d0e1a;
+  --text-secondary: #3d3f5c;
+  --text-muted: #8085a8;
+  --shadow-card: 0 4px 24px rgba(108, 99, 255, 0.1);
+  --shadow-card-hover: 0 12px 48px rgba(108, 99, 255, 0.2);
+}
+
+[data-theme="light"] .navbar {
+  background: rgba(240, 242, 255, 0.85);
+}
+
+[data-theme="light"] .navbar.scrolled {
+  background: rgba(240, 242, 255, 0.97);
+  box-shadow: 0 4px 30px rgba(108, 99, 255, 0.12);
+}
+
+[data-theme="light"] .mobile-nav-backdrop {
+  background: rgba(108, 99, 255, 0.15);
+}
+
+[data-theme="light"] .mobile-nav-drawer {
+  background: #f0f2ff;
+  border-right: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+[data-theme="light"] .sort-select {
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .filter-count {
+  background: #e8eaf6;
+}
+
+[data-theme="light"] .action-btn {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="light"] .toast {
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+}
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+body {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ─── Theme Toggle Button ─── */
+#theme-toggle {
+  position: relative;
+  overflow: hidden;
+}
+
+#theme-toggle i {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+#theme-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary-light);
+  background: rgba(108, 99, 255, 0.1);
+}
+
 /* ─── Reset ─── */
 *,
 *::before,
@@ -1069,10 +1146,18 @@ a {
   -webkit-appearance: none;
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right, var(--primary) 0%, var(--primary) 60%, var(--border) 60%, var(--border) 100%);
+  background: linear-gradient(to right, var(--primary) 0%, var(--primary) 60%, var(--bg-card) 60%, var(--bg-card) 100%);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+}
+
+/* WebKit track/thumb */
+.range-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+  border: none;
 }
 
 .range-slider::-webkit-slider-thumb {
@@ -1082,9 +1167,51 @@ a {
   height: 18px;
   border-radius: 50%;
   background: var(--primary);
-  border: 3px solid var(--bg-base);
+  /* match card background to avoid visible white/bright seam */
+  border: 3px solid var(--bg-card);
   box-shadow: 0 0 0 2px var(--primary);
   cursor: pointer;
+  margin-top: -7px; /* vertically center the thumb on the 4px track */
+}
+
+/* Firefox */
+.range-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.range-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 0 0 2px var(--primary);
+  cursor: pointer;
+}
+
+/* IE/Edge */
+.range-slider::-ms-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+  border: none;
+  color: transparent;
+}
+
+.range-slider::-ms-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 0 0 2px var(--primary);
+  cursor: pointer;
+}
+
+.range-slider:focus {
+  outline: none;
 }
 
 /* Sort & Grid Controls */
@@ -1614,7 +1741,9 @@ a {
   }
 
   .nav-search {
-    max-width: 200px;
+    flex: 1;
+    max-width: none;
+    min-width: 0;
   }
 
   .search-dropdown {
@@ -1740,15 +1869,18 @@ a {
     height: 140px;
   }
 
-  /* Mobile Search Improvements */
+  /* Mobile Search — full width on small screens */
   .nav-search {
-    max-width: 240px;
+    flex: 1;
+    max-width: none;
+    min-width: 0;
   }
 
   .nav-search input {
     height: 44px;
     font-size: 16px;
-    padding: 0 16px 0 42px;
+    padding: 0 40px 0 42px;
+    width: 100%;
   }
 
   .search-clear-btn {
