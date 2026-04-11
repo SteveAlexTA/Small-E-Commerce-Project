@@ -272,3 +272,26 @@
   background: var(--accent);
   color: #000;
 }
+
+.status-rejected {
+  background: rgba(247, 37, 133, 0.15);
+  color: var(--badge-hot);
+  border: 1px solid rgba(247, 37, 133, 0.3);
+}
+
+.btn-reject {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  background: rgba(247, 37, 133, 0.1);
+  color: var(--badge-hot);
+  border: 1px solid rgba(247, 37, 133, 0.5);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+}
+
+.btn-reject:hover {
+  background: var(--badge-hot);
+  color: #fff;
+}

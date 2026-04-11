@@ -152,6 +152,11 @@ function initAuth() {
       return;
     }
     
+    if (user.status === 'rejected') {
+      if (typeof showToast === 'function') showToast('Account Rejected', 'Your registration was rejected by the admin.', 'fas fa-ban');
+      return;
+    }
+
     if (user.status !== 'approved') {
       if (typeof showToast === 'function') showToast('Account Pending', 'Your account is pending admin approval.', 'fas fa-clock');
       return;
@@ -252,14 +257,21 @@ function renderAdminDashboard() {
     let statusHTML = '';
     if (user.status === 'approved') {
       statusHTML = `<span class="status-badge status-approved">Active</span>`;
+    } else if (user.status === 'rejected') {
+      statusHTML = `<span class="status-badge status-rejected">Rejected</span>`;
     } else {
       statusHTML = `<span class="status-badge status-pending">Pending</span>`;
     }
     
     // Action Button
     let actionHTML = '';
-    if (user.status !== 'approved') {
-      actionHTML = `<button class="btn-approve" onclick="approveUser(${user.id})">Approve</button>`;
+    if (user.status === 'pending') {
+      actionHTML = `
+        <div style="display:flex;gap:6px;">
+          <button class="btn-approve" onclick="approveUser(${user.id})">Approve</button>
+          <button class="btn-reject" onclick="rejectUser(${user.id})">Reject</button>
+        </div>
+      `;
     } else {
       actionHTML = `<span style="color:var(--text-muted);font-size:0.8rem;">None</span>`;
     }
@@ -283,6 +295,17 @@ window.approveUser = function(userId) {
     localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
     renderAdminDashboard();
     if (typeof showToast === 'function') showToast('Success', 'User approved successfully!', 'fas fa-check-circle');
+  }
+}
+
+// Ensure rejectUser is accessible globally
+window.rejectUser = function(userId) {
+  const userIndex = usersDb.findIndex(u => u.id === userId);
+  if (userIndex !== -1) {
+    usersDb[userIndex].status = 'rejected';
+    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
+    renderAdminDashboard();
+    if (typeof showToast === 'function') showToast('Rejected', 'User registration rejected.', 'fas fa-ban');
   }
 }
 
