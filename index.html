@@ -75,6 +75,9 @@
         <i class="fas fa-shopping-cart"></i>
         <span class="cart-count">0</span>
       </button>
+      <button class="btn btn-icon" id="admin-dashboard-btn" style="display:none;" aria-label="Admin Dashboard" title="Admin Dashboard">
+        <i class="fas fa-users-cog"></i>
+      </button>
       <button class="btn btn-primary" style="padding:10px 18px;font-size:0.85rem" id="sign-in-btn">
         Sign In
       </button>
@@ -282,6 +285,9 @@
       <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;width:100%">Sign In</button>
       <div class="auth-switch">
         Don't have an account? <a href="#" id="go-to-register" class="auth-link">Sign up</a>
+        <div style="margin-top:12px;font-size:0.85rem;">
+          Admin? <a href="#" id="go-to-admin-login" class="auth-link">Sign in as Admin</a>
+        </div>
       </div>
     </form>
 
@@ -314,6 +320,60 @@
         Already have an account? <a href="#" id="go-to-login" class="auth-link">Log in</a>
       </div>
     </form>
+
+    <!-- Admin Login Form -->
+    <form id="admin-login-form" class="auth-form">
+      <div class="form-group">
+        <label for="admin-email">Admin Email</label>
+        <div class="input-icon-wrap">
+          <i class="far fa-envelope"></i>
+          <input type="email" id="admin-email" placeholder="admin@nexustech.com" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="admin-pwd">Password</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="admin-pwd" placeholder="••••••••" required />
+          <button type="button" class="pwd-toggle-btn" tabindex="-1"><i class="far fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;width:100%;background:linear-gradient(135deg, #f72585 0%, #b5179e 100%);box-shadow:0 4px 20px rgba(247, 37, 133, 0.35)">Admin Sign In</button>
+      <div class="auth-switch">
+        Not an admin? <a href="#" id="back-to-login" class="auth-link">Back to User Login</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ADMIN DASHBOARD MODAL
+═══════════════════════════════ -->
+<div class="auth-modal" id="admin-modal" aria-hidden="true">
+  <div class="auth-modal-backdrop" id="admin-modal-backdrop"></div>
+  <div class="auth-modal-content admin-modal-content">
+    <button class="auth-close-btn" id="admin-close-btn" aria-label="Close admin dashboard"><i class="fas fa-times"></i></button>
+    
+    <div class="auth-header">
+      <h3 class="auth-title">Admin Dashboard</h3>
+      <p class="auth-subtitle">Manage registered users and account status.</p>
+    </div>
+
+    <div class="admin-users-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-users-list">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
