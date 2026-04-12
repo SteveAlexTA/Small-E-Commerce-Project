@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,8 +14,10 @@ app.use(express.json());
 // Read products from JSON file
 const productsPath = path.join(__dirname, 'products.json');
 const usersPath = path.join(__dirname, 'users.json');
+const sessionsPath = path.join(__dirname, 'sessions.json');
 let products = [];
 let users = [];
+let sessions = {};
 
 function loadData() {
   try {
@@ -32,6 +35,22 @@ function loadData() {
     console.error('Error loading users:', error);
     users = [];
   }
+
+  try {
+    const sessionsData = fs.readFileSync(sessionsPath, 'utf-8');
+    sessions = JSON.parse(sessionsData);
+    // Cleanup expired sessions on load
+    const now = Date.now();
+    for (const token in sessions) {
+      if (sessions[token].expiresAt < now) {
+        delete sessions[token];
+      }
+    }
+    saveSessions();
+  } catch (error) {
+    console.error('Error loading sessions:', error);
+    sessions = {};
+  }
 }
 
 function saveUsers() {
@@ -41,6 +60,38 @@ function saveUsers() {
     console.error('Error saving users:', error);
   }
 }
+
+function saveSessions() {
+  try {
+    fs.writeFileSync(sessionsPath, JSON.stringify(sessions, null, 2));
+  } catch (error) {
+    console.error('Error saving sessions:', error);
+  }
+}
+
+// Middleware to verify token
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const session = sessions[token];
+
+  if (!session) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  }
+
+  if (Date.now() > session.expiresAt) {
+    delete sessions[token];
+    saveSessions();
+    return res.status(401).json({ error: 'Unauthorized: Session expired' });
+  }
+
+  req.user = session.user;
+  next();
+};
 
 loadData();
 
@@ -147,14 +198,31 @@ app.post('/api/auth/login', (req, res) => {
     }
   }
 
-  res.json({ message: 'Login successful', user: { ...user, password: '' } });
+
+  // SCRUM-21: Session Management
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + (2 * 60 * 60 * 1000); // 2 hours from now
+
+  // Persist session
+  sessions[token] = {
+    user: { ...user, password: '' },
+    expiresAt
+  };
+  saveSessions();
+
+  res.json({ 
+    message: 'Login successful', 
+    user: { ...user, password: '' },
+    token,
+    expiresAt
+  });
 });
 
-app.get('/api/users', (req, res) => {
+app.get('/api/users', authenticate, (req, res) => {
   res.json(users.map(u => ({ ...u, password: '' })));
 });
 
-app.put('/api/users/:id/status', (req, res) => {
+app.put('/api/users/:id/status', authenticate, (req, res) => {
   const { status } = req.body;
   const user = users.find(u => u.id === parseInt(req.params.id));
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -164,7 +232,7 @@ app.put('/api/users/:id/status', (req, res) => {
   res.json({ message: 'User status updated', user: { ...user, password: '' } });
 });
 
-app.delete('/api/users/:id', (req, res) => {
+app.delete('/api/users/:id', authenticate, (req, res) => {
   users = users.filter(u => u.id !== parseInt(req.params.id));
   saveUsers();
   res.json({ message: 'User deleted' });

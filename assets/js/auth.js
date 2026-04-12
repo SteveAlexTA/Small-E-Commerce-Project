@@ -1,6 +1,49 @@
-// ─── Authentication State ───
 const API_URL = 'http://127.0.0.1:5000';
 let currentUser = JSON.parse(localStorage.getItem('nexusCurrentUser')) || null;
+let sessionTimeout = null;
+
+async function authFetch(url, options = {}) {
+  const token = localStorage.getItem('nexusToken');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...options.headers
+  };
+
+  const response = await fetch(url, { ...options, headers });
+  
+  if (response.status === 401) {
+    handleForcedLogout();
+    throw new Error('Session expired');
+  }
+  
+  return response;
+}
+
+function handleForcedLogout() {
+  currentUser = null;
+  localStorage.removeItem('nexusCurrentUser');
+  localStorage.removeItem('nexusToken');
+  localStorage.removeItem('nexusExpiresAt');
+  if (sessionTimeout) clearTimeout(sessionTimeout);
+  updateAuthUI();
+  if (typeof showToast === 'function') {
+    showToast('Session Expired', 'Please sign in again.', 'fas fa-clock');
+  }
+}
+
+function startSessionTimer(expiresAt) {
+  if (sessionTimeout) clearTimeout(sessionTimeout);
+  
+  const remaining = parseInt(expiresAt) - Date.now();
+  if (remaining <= 0) {
+    handleForcedLogout();
+  } else {
+    sessionTimeout = setTimeout(() => {
+      handleForcedLogout();
+    }, remaining);
+  }
+}
 
 function openAuthModal() {
   const modal = document.querySelector('#auth-modal');
@@ -35,6 +78,8 @@ function updateAuthUI() {
       if(confirm('Are you sure you want to sign out?')) {
         currentUser = null;
         localStorage.removeItem('nexusCurrentUser');
+        localStorage.removeItem('nexusToken');
+        localStorage.removeItem('nexusExpiresAt');
         updateAuthUI();
         if (typeof showToast === 'function') {
           showToast('Signed Out', 'You have been signed out successfully.', 'fas fa-sign-out-alt');
@@ -53,7 +98,27 @@ function updateAuthUI() {
   }
 }
 
+function checkSessionExpiration() {
+  const expiresAt = localStorage.getItem('nexusExpiresAt');
+  if (currentUser && expiresAt && Date.now() > parseInt(expiresAt)) {
+    currentUser = null;
+    localStorage.removeItem('nexusCurrentUser');
+    localStorage.removeItem('nexusToken');
+    localStorage.removeItem('nexusExpiresAt');
+    updateAuthUI();
+    if (typeof showToast === 'function') {
+      showToast('Session Expired', 'Your session has expired. Please sign in again.', 'fas fa-clock');
+    }
+  }
+}
+
 function initAuth() {
+  const expiresAt = localStorage.getItem('nexusExpiresAt');
+  if (expiresAt) {
+    startSessionTimer(expiresAt);
+  } else {
+    checkSessionExpiration();
+  }
   updateAuthUI();
 
   const authModal = document.querySelector('#auth-modal');
@@ -148,6 +213,9 @@ function initAuth() {
       
       currentUser = data.user;
       localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
+      localStorage.setItem('nexusToken', data.token);
+      localStorage.setItem('nexusExpiresAt', data.expiresAt.toString());
+      startSessionTimer(data.expiresAt);
       updateAuthUI();
       closeAuthModal();
       if (typeof showToast === 'function') showToast('Success', 'Logged in successfully!', 'fas fa-check-circle');
@@ -213,6 +281,9 @@ function initAuth() {
       
       currentUser = data.user;
       localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
+      localStorage.setItem('nexusToken', data.token);
+      localStorage.setItem('nexusExpiresAt', data.expiresAt.toString());
+      startSessionTimer(data.expiresAt);
       updateAuthUI();
       closeAuthModal();
       if (typeof showToast === 'function') showToast('Success', 'Logged in as Admin!', 'fas fa-shield-alt');
@@ -243,7 +314,7 @@ function renderAdminDashboard() {
   
   tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Loading users...</td></tr>';
   
-  fetch(`${API_URL}/api/users`)
+  authFetch(`${API_URL}/api/users`)
     .then(resp => resp.json())
     .then(users => {
       tbody.innerHTML = '';
@@ -303,9 +374,8 @@ function renderAdminDashboard() {
 // Ensure updateUserStatus is accessible globally
 window.updateUserStatus = async function(userId, newStatus) {
   try {
-    const resp = await fetch(`${API_URL}/api/users/${userId}/status`, {
+    const resp = await authFetch(`${API_URL}/api/users/${userId}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
     });
     
@@ -324,7 +394,7 @@ window.updateUserStatus = async function(userId, newStatus) {
 window.deleteUser = async function(userId) {
   if(confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) {
     try {
-      const resp = await fetch(`${API_URL}/api/users/${userId}`, {
+      const resp = await authFetch(`${API_URL}/api/users/${userId}`, {
         method: 'DELETE'
       });
       
