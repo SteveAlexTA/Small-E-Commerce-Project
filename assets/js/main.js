@@ -247,46 +247,7 @@ function renderCatalog() {
 
   $('#results-count').innerHTML = `Showing <strong>${list.length}</strong> of <strong>${products.length}</strong> products`;
 
-  grid.innerHTML = list.map(p => `
-    <div class="product-card reveal" data-id="${p.id}">
-      <div class="product-card-img-wrap">
-        <img src="${p.img}" alt="${p.name}" class="product-card-img" loading="lazy">
-        <div class="product-card-badges">${badgeHTML(p.badges)}</div>
-        <div class="product-card-actions">
-          <button class="action-btn ${wishlist.includes(p.id) ? 'active' : ''}" title="Wishlist"
-            onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)">
-            <i class="${wishlist.includes(p.id) ? 'fas' : 'far'} fa-heart"></i>
-          </button>
-          <button class="action-btn" title="Quick View" onclick="event.stopPropagation(); quickView(${p.id})">
-            <i class="fas fa-eye"></i>
-          </button>
-        </div>
-      </div>
-      <div class="product-card-body">
-        <div class="product-brand">${p.brand}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-specs">
-          ${p.specs.map(s => `<span class="spec-tag">${s}</span>`).join('')}
-        </div>
-        <div class="product-rating">
-          <span class="stars">${starsHTML(p.rating)}</span>
-          <span class="rating-num" style="font-size:0.8rem;font-weight:600;color:var(--text-secondary)">${p.rating}</span>
-          <span class="rating-count">(${p.reviews.toLocaleString()})</span>
-        </div>
-        <div class="product-price-row">
-          <span class="price-current">${fmt(p.price)}</span>
-          ${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ''}
-          ${p.oldPrice ? `<span class="price-discount">-${Math.round((1 - p.price / p.oldPrice) * 100)}%</span>` : ''}
-        </div>
-      </div>
-      <div class="product-card-footer">
-        <button class="btn btn-primary" style="flex:1;height:38px;font-size:0.8rem;border-radius:var(--radius-sm)"
-          onclick="event.stopPropagation(); addToCart(${p.id})">
-          <i class="fas fa-shopping-cart"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-  `).join('');
+  grid.innerHTML = list.map(p => renderProductCard(p)).join('');
 
   // Apply staggered reveal
   setTimeout(() => {
@@ -503,6 +464,29 @@ function initGridToggle() {
 }
 
 // ─── Brand Filters ───
+function renderBrandFilters() {
+  const container = $('#brand-filter-group');
+  if (!container) return;
+
+  const brandCounts = {};
+  products.forEach(p => {
+    const brand = p.brand;
+    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+  });
+
+  const brands = Object.keys(brandCounts).sort((a, b) => a.localeCompare(b));
+
+  container.innerHTML = `
+    <div class="filter-group-title">Brand</div>
+    ${brands.map(brand => `
+      <label class="filter-option">
+        <input type="checkbox" data-brand="${brand.toLowerCase()}" ${activeFilters.brands.includes(brand.toLowerCase()) ? 'checked' : ''}> ${brand}
+        <span class="filter-count">${brandCounts[brand]}</span>
+      </label>
+    `).join('')}
+  `;
+}
+
 function initBrandFilters() {
   $$('[data-brand]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -966,6 +950,7 @@ function renderAll() {
   initChips();
   initSort();
   initGridToggle();
+  renderBrandFilters();
   initBrandFilters();
   initPriceSlider();
   initFilterReset();
