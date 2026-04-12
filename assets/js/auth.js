@@ -1,19 +1,6 @@
 // ─── Authentication State ───
+const API_URL = 'http://127.0.0.1:5000';
 let currentUser = JSON.parse(localStorage.getItem('nexusCurrentUser')) || null;
-let usersDb = JSON.parse(localStorage.getItem('nexusUsers')) || [];
-
-// Initialize default admin if not exists
-if (!usersDb.find(u => u.role === 'admin')) {
-  usersDb.push({
-    id: 0,
-    name: 'Admin',
-    email: 'admin@nexustech.com',
-    password: 'admin',
-    role: 'admin',
-    status: 'approved'
-  });
-  localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-}
 
 function openAuthModal() {
   const modal = document.querySelector('#auth-modal');
@@ -140,90 +127,99 @@ function initAuth() {
   overlay?.addEventListener('click', closeAuthModal);
 
   // Form Submission
-  loginForm?.addEventListener('submit', (e) => {
+  loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.querySelector('#login-email').value;
     const pwd = document.querySelector('#login-pwd').value;
     
-    const user = usersDb.find(u => u.email === email && u.password === pwd);
-    
-    if (!user) {
-      if (typeof showToast === 'function') showToast('Error', 'Invalid email or password.', 'fas fa-exclamation-circle');
-      return;
+    try {
+      const resp = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd })
+      });
+      
+      const data = await resp.json();
+      
+      if (!resp.ok) {
+        if (typeof showToast === 'function') showToast('Error', data.error || 'Login failed.', 'fas fa-exclamation-circle');
+        return;
+      }
+      
+      currentUser = data.user;
+      localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      if (typeof showToast === 'function') showToast('Success', 'Logged in successfully!', 'fas fa-check-circle');
+    } catch (err) {
+      console.error(err);
+      if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
     }
-    
-    if (user.status === 'rejected') {
-      if (typeof showToast === 'function') showToast('Account Rejected', 'Your registration was rejected by the admin.', 'fas fa-ban');
-      return;
-    }
-
-    if (user.status === 'deactivated') {
-      if (typeof showToast === 'function') showToast('Account Deactivated', 'Your account has been deactivated. Please contact support.', 'fas fa-user-lock');
-      return;
-    }
-
-    if (user.status !== 'approved') {
-      if (typeof showToast === 'function') showToast('Account Pending', 'Your account is pending admin approval.', 'fas fa-clock');
-      return;
-    }
-    
-    currentUser = user;
-    localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
-    updateAuthUI();
-    closeAuthModal();
-    if (typeof showToast === 'function') showToast('Success', 'Logged in successfully!', 'fas fa-check-circle');
   });
 
-  registerForm?.addEventListener('submit', (e) => {
+  registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.querySelector('#reg-name').value;
     const email = document.querySelector('#reg-email').value;
     const pwd = document.querySelector('#reg-pwd').value;
 
-    if (usersDb.find(u => u.email === email)) {
-      if (typeof showToast === 'function') showToast('Error', 'Email is already registered.', 'fas fa-exclamation-circle');
-      return;
+    try {
+      const resp = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pwd })
+      });
+      
+      const data = await resp.json();
+      
+      if (!resp.ok) {
+        if (typeof showToast === 'function') showToast('Error', data.error || 'Registration failed.', 'fas fa-exclamation-circle');
+        return;
+      }
+      
+      if (typeof showToast === 'function') showToast('Registration complete', 'Your account is pending admin approval.', 'fas fa-info-circle');
+      
+      // Switch to login form automatically
+      registerForm.classList.remove('active');
+      loginForm.classList.add('active');
+      authTitle.textContent = 'Sign in to your account';
+      authSubtitle.textContent = 'Welcome back! Please enter your details.';
+      document.querySelector('#login-email').value = email;
+      document.querySelector('#login-pwd').value = pwd;
+    } catch (err) {
+      console.error(err);
+      if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
     }
-
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      password: pwd,
-      status: 'pending' // Admin must approve
-    };
-    
-    usersDb.push(newUser);
-    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-    
-    if (typeof showToast === 'function') showToast('Registration complete', 'Your account has been created and is pending admin approval.', 'fas fa-info-circle');
-    
-    // Switch to login form automatically
-    registerForm.classList.remove('active');
-    loginForm.classList.add('active');
-    authTitle.textContent = 'Sign in to your account';
-    authSubtitle.textContent = 'Welcome back! Please enter your details.';
-    document.querySelector('#login-email').value = email;
-    document.querySelector('#login-pwd').value = pwd; // helpful auto-fill
   });
 
-  adminLoginForm?.addEventListener('submit', (e) => {
+  adminLoginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.querySelector('#admin-email').value;
     const pwd = document.querySelector('#admin-pwd').value;
     
-    const user = usersDb.find(u => u.email === email && u.password === pwd && u.role === 'admin');
-    
-    if (!user) {
-      if (typeof showToast === 'function') showToast('Error', 'Invalid admin credentials.', 'fas fa-exclamation-circle');
-      return;
+    try {
+      const resp = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd, isAdminLogin: true })
+      });
+      
+      const data = await resp.json();
+      
+      if (!resp.ok) {
+        if (typeof showToast === 'function') showToast('Error', data.error || 'Admin login failed.', 'fas fa-exclamation-circle');
+        return;
+      }
+      
+      currentUser = data.user;
+      localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      if (typeof showToast === 'function') showToast('Success', 'Logged in as Admin!', 'fas fa-shield-alt');
+    } catch (err) {
+      console.error(err);
+      if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
     }
-    
-    currentUser = user;
-    localStorage.setItem('nexusCurrentUser', JSON.stringify(currentUser));
-    updateAuthUI();
-    closeAuthModal();
-    if (typeof showToast === 'function') showToast('Success', 'Logged in as Admin!', 'fas fa-shield-alt');
   });
 }
 
@@ -245,98 +241,100 @@ function renderAdminDashboard() {
   const tbody = document.querySelector('#admin-users-list');
   if (!tbody) return;
   
-  tbody.innerHTML = '';
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Loading users...</td></tr>';
   
-  // Filter out admin users or show all non-admin
-  const regularUsers = usersDb.filter(u => u.role !== 'admin');
-  
-  if (regularUsers.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">No registered users found.</td></tr>`;
-    return;
-  }
-  
-  regularUsers.forEach(user => {
-    const tr = document.createElement('tr');
+  fetch(`${API_URL}/api/users`)
+    .then(resp => resp.json())
+    .then(users => {
+      tbody.innerHTML = '';
+      const regularUsers = users.filter(u => u.role !== 'admin');
+      
+      if (regularUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">No registered users found.</td></tr>`;
+        return;
+      }
+      
+      regularUsers.forEach(user => {
+        const tr = document.createElement('tr');
+        
+        let statusHTML = '';
+        if (user.status === 'approved') {
+          statusHTML = `<span class="status-badge status-approved">Active</span>`;
+        } else if (user.status === 'rejected') {
+          statusHTML = `<span class="status-badge status-rejected">Rejected</span>`;
+        } else if (user.status === 'deactivated') {
+          statusHTML = `<span class="status-badge status-deactivated">Deactivated</span>`;
+        } else {
+          statusHTML = `<span class="status-badge status-pending">Pending</span>`;
+        }
+        
+        let actionHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;">`;
+        if (user.status === 'pending') {
+          actionHTML += `
+            <button class="btn-approve" onclick="updateUserStatus(${user.id}, 'approved')">Approve</button>
+            <button class="btn-reject" onclick="updateUserStatus(${user.id}, 'rejected')">Reject</button>
+          `;
+        } else if (user.status === 'approved') {
+          actionHTML += `
+            <button class="btn-deactivate" onclick="updateUserStatus(${user.id}, 'deactivated')">Deactivate</button>
+          `;
+        } else if (user.status === 'deactivated') {
+          actionHTML += `
+            <button class="btn-approve" onclick="updateUserStatus(${user.id}, 'approved')">Activate</button>
+          `;
+        }
+        actionHTML += `<button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button></div>`;
+        
+        tr.innerHTML = `
+          <td style="font-weight:500;">${user.name}</td>
+          <td>${user.email}</td>
+          <td>${statusHTML}</td>
+          <td>${actionHTML}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--badge-hot)">Failed to load users.</td></tr>`;
+    });
+}
+
+// Ensure updateUserStatus is accessible globally
+window.updateUserStatus = async function(userId, newStatus) {
+  try {
+    const resp = await fetch(`${API_URL}/api/users/${userId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
     
-    // Status Badge
-    let statusHTML = '';
-    if (user.status === 'approved') {
-      statusHTML = `<span class="status-badge status-approved">Active</span>`;
-    } else if (user.status === 'rejected') {
-      statusHTML = `<span class="status-badge status-rejected">Rejected</span>`;
-    } else if (user.status === 'deactivated') {
-      statusHTML = `<span class="status-badge status-deactivated">Deactivated</span>`;
-    } else {
-      statusHTML = `<span class="status-badge status-pending">Pending</span>`;
+    if (resp.ok) {
+      renderAdminDashboard();
+      const msg = newStatus === 'approved' ? 'User approved successfully!' : 
+                  newStatus === 'rejected' ? 'User registration rejected.' :
+                  'User account deactivated.';
+      if (typeof showToast === 'function') showToast('Success', msg, 'fas fa-check-circle');
     }
-    
-    // Action Button
-    let actionHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;">`;
-    if (user.status === 'pending') {
-      actionHTML += `
-        <button class="btn-approve" onclick="approveUser(${user.id})">Approve</button>
-        <button class="btn-reject" onclick="rejectUser(${user.id})">Reject</button>
-      `;
-    } else if (user.status === 'approved') {
-      actionHTML += `
-        <button class="btn-deactivate" onclick="deactivateUser(${user.id})">Deactivate</button>
-      `;
-    } else if (user.status === 'deactivated') {
-      actionHTML += `
-        <button class="btn-approve" onclick="approveUser(${user.id})">Activate</button>
-      `;
-    }
-    actionHTML += `<button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button></div>`;
-    
-    tr.innerHTML = `
-      <td style="font-weight:500;">${user.name}</td>
-      <td>${user.email}</td>
-      <td>${statusHTML}</td>
-      <td>${actionHTML}</td>
-    `;
-    
-    tbody.appendChild(tr);
-  });
-}
-
-// Ensure approveUser is accessible globally
-window.approveUser = function(userId) {
-  const userIndex = usersDb.findIndex(u => u.id === userId);
-  if (userIndex !== -1) {
-    usersDb[userIndex].status = 'approved';
-    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-    renderAdminDashboard();
-    if (typeof showToast === 'function') showToast('Success', 'User approved successfully!', 'fas fa-check-circle');
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// Ensure rejectUser is accessible globally
-window.rejectUser = function(userId) {
-  const userIndex = usersDb.findIndex(u => u.id === userId);
-  if (userIndex !== -1) {
-    usersDb[userIndex].status = 'rejected';
-    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-    renderAdminDashboard();
-    if (typeof showToast === 'function') showToast('Rejected', 'User registration rejected.', 'fas fa-ban');
-  }
-}
-
-window.deactivateUser = function(userId) {
-  const userIndex = usersDb.findIndex(u => u.id === userId);
-  if (userIndex !== -1) {
-    usersDb[userIndex].status = 'deactivated';
-    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-    renderAdminDashboard();
-    if (typeof showToast === 'function') showToast('Deactivated', 'User account deactivated.', 'fas fa-user-lock');
-  }
-}
-
-window.deleteUser = function(userId) {
+window.deleteUser = async function(userId) {
   if(confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) {
-    usersDb = usersDb.filter(u => u.id !== userId);
-    localStorage.setItem('nexusUsers', JSON.stringify(usersDb));
-    renderAdminDashboard();
-    if (typeof showToast === 'function') showToast('Deleted', 'User account removed.', 'fas fa-trash-alt');
+    try {
+      const resp = await fetch(`${API_URL}/api/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (resp.ok) {
+        renderAdminDashboard();
+        if (typeof showToast === 'function') showToast('Deleted', 'User account removed.', 'fas fa-trash-alt');
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 
