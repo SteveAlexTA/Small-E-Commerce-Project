@@ -365,12 +365,12 @@ a {
 
 .nav-inner {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 12px;
 }
 
 .logo {
@@ -403,8 +403,8 @@ a {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex: 1;
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
 .nav-link {
@@ -428,8 +428,9 @@ a {
 }
 
 .nav-search {
-  flex: 1;
-  max-width: 360px;
+  flex: 10;
+  width: 100%;
+  margin: 0 12px;
   position: relative;
 }
 
@@ -627,6 +628,78 @@ a {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg-base);
+}
+
+/* User Menu Dropdown */
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.user-dropdown-content {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  min-width: 220px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card-hover);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+.user-menu:hover .user-dropdown-content,
+.user-dropdown-content.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.user-dropdown-content a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.user-dropdown-content a:hover {
+  background: var(--bg-glass);
+  color: var(--primary-light);
+  padding-left: 20px;
+}
+
+.user-dropdown-content a i {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.user-dropdown-content a#drop-signout:hover {
+  color: var(--badge-hot);
+  background: rgba(247, 37, 133, 0.08);
 }
 
 .hamburger {

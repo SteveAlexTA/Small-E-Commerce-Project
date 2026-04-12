@@ -1,4 +1,6 @@
-const API_URL = 'http://127.0.0.1:5000';
+const API_URL = window.location.port === '5000' ? '' : 'http://localhost:5000';
+console.log('[Auth] API_URL set to:', API_URL || '(relative)');
+
 let currentUser = JSON.parse(localStorage.getItem('nexusCurrentUser')) || null;
 let sessionTimeout = null;
 
@@ -21,14 +23,25 @@ async function authFetch(url, options = {}) {
 }
 
 function handleForcedLogout() {
+  performLogout(false); // No confirm on forced
+}
+
+function performLogout(ask = true) {
+  // Removing confirm() to ensure instant logout as requested by the user's flow
+  console.log('[Auth] performLogout called. Logging out user:', currentUser?.email);
   currentUser = null;
   localStorage.removeItem('nexusCurrentUser');
   localStorage.removeItem('nexusToken');
   localStorage.removeItem('nexusExpiresAt');
   if (sessionTimeout) clearTimeout(sessionTimeout);
+  
   updateAuthUI();
+  closeAuthModal();
+  closeAdminDashboard();
+  document.querySelector('#user-dropdown')?.classList.remove('active');
+  
   if (typeof showToast === 'function') {
-    showToast('Session Expired', 'Please sign in again.', 'fas fa-clock');
+    showToast('Signed Out', 'You have been signed out successfully.', 'fas fa-sign-out-alt');
   }
 }
 
@@ -64,37 +77,27 @@ function updateAuthUI() {
     signInBtn.innerHTML = `<i class="fas fa-user-circle" style="margin-right:6px"></i> ${currentUser.name.split(' ')[0]}`;
     signInBtn.classList.remove('btn-primary');
     signInBtn.classList.add('btn-outline');
+    signInBtn.title = 'Click to Sign Out';
 
-    if (currentUser.role === 'admin' && adminDashboardBtn) {
-      adminDashboardBtn.style.display = 'inline-flex';
-    } else if (adminDashboardBtn) {
-      adminDashboardBtn.style.display = 'none';
+    if (currentUser.role === 'admin') {
+      if (adminDashboardBtn) adminDashboardBtn.style.display = 'inline-flex';
+      document.querySelector('#drop-admin').style.display = 'flex';
+      document.querySelector('#drop-dashboard').style.display = 'none';
+    } else {
+      if (adminDashboardBtn) adminDashboardBtn.style.display = 'none';
+      document.querySelector('#drop-admin').style.display = 'none';
+      document.querySelector('#drop-dashboard').style.display = 'flex';
     }
-
-    // Implement signout logic if clicked when logged in
-    signInBtn.onclick = (e) => {
-      e.preventDefault();
-      // Simple confirm before signing out
-      if(confirm('Are you sure you want to sign out?')) {
-        currentUser = null;
-        localStorage.removeItem('nexusCurrentUser');
-        localStorage.removeItem('nexusToken');
-        localStorage.removeItem('nexusExpiresAt');
-        updateAuthUI();
-        if (typeof showToast === 'function') {
-          showToast('Signed Out', 'You have been signed out successfully.', 'fas fa-sign-out-alt');
-        }
-      }
-    };
   } else {
     signInBtn.innerHTML = `Sign In`;
     signInBtn.classList.add('btn-primary');
     signInBtn.classList.remove('btn-outline');
+    signInBtn.title = 'Sign In';
     if (adminDashboardBtn) adminDashboardBtn.style.display = 'none';
-    signInBtn.onclick = (e) => {
-      e.preventDefault();
-      openAuthModal();
-    };
+    
+    // Hide dropdown items if logged out
+    document.querySelector('#drop-admin').style.display = 'none';
+    document.querySelector('#drop-dashboard').style.display = 'none';
   }
 }
 
@@ -112,7 +115,15 @@ function checkSessionExpiration() {
   }
 }
 
+let isAuthInitialized = false;
+
 function initAuth() {
+  if (isAuthInitialized) {
+    updateAuthUI();
+    return;
+  }
+  isAuthInitialized = true;
+  console.log('[Auth] Initializing authentication system...');
   const expiresAt = localStorage.getItem('nexusExpiresAt');
   if (expiresAt) {
     startSessionTimer(expiresAt);
@@ -191,6 +202,7 @@ function initAuth() {
   closeBtn?.addEventListener('click', closeAuthModal);
   overlay?.addEventListener('click', closeAuthModal);
 
+  // Sign-In / Sign-Out Global Listener
   // Form Submission
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -232,31 +244,29 @@ function initAuth() {
     const pwd = document.querySelector('#reg-pwd').value;
 
     try {
-      const resp = await fetch(`${API_URL}/api/auth/register`, {
+      const resp = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password: pwd })
+        body: JSON.stringify({ name, username: email, password: pwd })
       });
       
       const data = await resp.json();
       
       if (!resp.ok) {
+        alert(data.error || 'Registration failed.');
         if (typeof showToast === 'function') showToast('Error', data.error || 'Registration failed.', 'fas fa-exclamation-circle');
         return;
       }
       
+      alert(data.message || 'Registration complete!');
       if (typeof showToast === 'function') showToast('Registration complete', 'Your account is pending admin approval.', 'fas fa-info-circle');
       
       // Switch to login form automatically
       registerForm.classList.remove('active');
       loginForm.classList.add('active');
-      authTitle.textContent = 'Sign in to your account';
-      authSubtitle.textContent = 'Welcome back! Please enter your details.';
-      document.querySelector('#login-email').value = email;
-      document.querySelector('#login-pwd').value = pwd;
     } catch (err) {
       console.error(err);
-      if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
+      alert('Server connection failed.');
     }
   });
 
@@ -292,6 +302,40 @@ function initAuth() {
       if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
     }
   });
+
+  // Sign-In / Sign-Out Global Listener
+  document.querySelector('#sign-in-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!currentUser) {
+      openAuthModal();
+    }
+    // If logged in, we let the dropdown menu items handle the actions
+  });
+
+  // Admin Dashboard Sign-Out
+  document.querySelector('#admin-sign-out-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    performLogout();
+  });
+
+  // Dropdown Sign-Out
+  document.querySelector('#drop-signout')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    performLogout();
+  });
+
+  // Toggle dropdown on click for better accessibility
+  document.querySelector('#sign-in-btn')?.addEventListener('click', (e) => {
+    if (currentUser) {
+      document.querySelector('#user-dropdown').classList.toggle('active');
+    }
+  });
+
+  // Dropdown Admin/Dashboard
+  document.querySelector('#drop-admin')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAdminDashboard();
+  });
 }
 
 // ─── Admin Dashboard Logic ───
@@ -310,22 +354,33 @@ function closeAdminDashboard() {
 
 function renderAdminDashboard() {
   const tbody = document.querySelector('#admin-users-list');
+  const searchInput = document.querySelector('#admin-user-search');
+  const countEl = document.querySelector('#admin-total-count');
   if (!tbody) return;
+  
+  const query = searchInput?.value.toLowerCase() || '';
   
   tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Loading users...</td></tr>';
   
   authFetch(`${API_URL}/api/users`)
     .then(resp => resp.json())
     .then(users => {
-      tbody.innerHTML = '';
       const regularUsers = users.filter(u => u.role !== 'admin');
+      if (countEl) countEl.textContent = regularUsers.length;
+
+      const filtered = regularUsers.filter(u => 
+        u.name.toLowerCase().includes(query) || 
+        u.email.toLowerCase().includes(query)
+      );
+
+      tbody.innerHTML = '';
       
-      if (regularUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">No registered users found.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">${query ? 'No matching users found.' : 'No registered users found.'}</td></tr>`;
         return;
       }
       
-      regularUsers.forEach(user => {
+      filtered.forEach(user => {
         const tr = document.createElement('tr');
         
         let statusHTML = '';
@@ -421,4 +476,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
   adminCloseBtn?.addEventListener('click', closeAdminDashboard);
   adminBackdrop?.addEventListener('click', closeAdminDashboard);
+
+  // Admin Search
+  document.querySelector('#admin-user-search')?.addEventListener('input', () => {
+    // We can just re-render or do local filtering for speed
+    renderAdminDashboard();
+  });
 });

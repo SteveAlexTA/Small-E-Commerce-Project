@@ -5,10 +5,15 @@
 // Product data loaded from JSON
 let products = [];
 
-// Load products from JSON file
+// Update this to your API URL if needed, or use relative if proxying
+const API_BASE_URL = window.location.port === '5000' ? '' : 'http://localhost:5000';
+console.log('[Main] API_BASE_URL set to:', API_BASE_URL || '(relative)');
+
+
+// Load products from API
 async function loadProducts() {
   try {
-    const response = await fetch('api/products.json');
+    const response = await fetch(`${API_BASE_URL}/api/products`);
     if (!response.ok) throw new Error('Failed to load products');
     products = await response.json();
     console.log(`✓ Loaded ${products.length} products`);

@@ -78,9 +78,16 @@
       <button class="btn btn-icon" id="admin-dashboard-btn" style="display:none;" aria-label="Admin Dashboard" title="Admin Dashboard">
         <i class="fas fa-users-cog"></i>
       </button>
-      <button class="btn btn-primary" style="padding:10px 18px;font-size:0.85rem" id="sign-in-btn">
-        Sign In
-      </button>
+      <div class="user-menu" id="user-menu-wrap">
+        <button class="btn btn-primary" style="padding:10px 18px;font-size:0.85rem" id="sign-in-btn">
+          Sign In
+        </button>
+        <div class="user-dropdown-content" id="user-dropdown">
+          <a href="#" id="drop-dashboard" style="display:none;"><i class="fas fa-chart-line"></i> Dashboard</a>
+          <a href="#" id="drop-admin" style="display:none;"><i class="fas fa-users-cog"></i> Admin Panel</a>
+          <a href="#" id="drop-signout"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        </div>
+      </div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
@@ -354,9 +361,25 @@
   <div class="auth-modal-content admin-modal-content">
     <button class="auth-close-btn" id="admin-close-btn" aria-label="Close admin dashboard"><i class="fas fa-times"></i></button>
     
-    <div class="auth-header">
+    <div class="auth-header" style="position:relative;">
       <h3 class="auth-title">Admin Dashboard</h3>
       <p class="auth-subtitle">Manage registered users and account status.</p>
+      <button class="btn btn-outline" id="admin-sign-out-btn" style="position:absolute; top:0; right:40px; border-color:var(--accent-warm); color:var(--accent-warm); font-size:0.75rem; padding:6px 12px;">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+
+    <div class="admin-dashboard-controls" style="padding:20px 30px; background:var(--bg-surface); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:15px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="font-size:1rem; font-weight:600;">User Management</h4>
+        <div style="font-size:0.85rem; color:var(--text-secondary); background:var(--bg-glass); padding:4px 12px; border-radius:99px; border:1px solid var(--border);">
+          Total: <span id="admin-total-count" style="color:var(--primary-light); font-weight:700;">0</span> users
+        </div>
+      </div>
+      <div class="input-icon-wrap" style="width:100%;">
+        <i class="fas fa-search" style="font-size:1.1rem;"></i>
+        <input type="text" id="admin-user-search" placeholder="Search by name or email address..." style="width:100%; height:52px; font-size:1.05rem; background:var(--bg-base); border-color:var(--border);" />
+      </div>
     </div>
 
     <div class="admin-users-wrap">
