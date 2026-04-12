@@ -44,6 +44,8 @@ class Product(db.Model):
     category = db.Column(db.String(50))
     trending = db.Column(db.Boolean)
     rank = db.Column(db.Integer)
+    features = db.Column(db.Text) # Stored as JSON string
+    condition = db.Column(db.String(50))
 
 # Simple Session Store (In-memory)
 sessions = {}
@@ -64,7 +66,9 @@ def get_product_json(p):
         'badges': json.loads(p.badges) if p.badges else [],
         'category': p.category,
         'trending': p.trending,
-        'rank': p.rank
+        'rank': p.rank,
+        'features': json.loads(p.features) if getattr(p, 'features', None) else [],
+        'condition': getattr(p, 'condition', 'New')
     }
 
 # === Initialization & Migration ===
@@ -93,7 +97,9 @@ def migrate_products():
                         badges=json.dumps(p['badges']),
                         category=p['category'],
                         trending=p['trending'],
-                        rank=p['rank']
+                        rank=p['rank'],
+                        features=json.dumps(p.get('features', [])),
+                        condition=p.get('condition', 'New')
                     )
                     db.session.merge(new_p)
                 db.session.commit()

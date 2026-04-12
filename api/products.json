@@ -2,301 +2,652 @@
   {
     "id": 1,
     "brand": "Apple",
-    "name": "MacBook Air M3 — 15\" Midnight",
+    "name": "MacBook Air M3 - 15in Midnight",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["M3 Chip", "16GB", "256GB SSD"],
+    "specs": [
+      "Apple M3 Chip with 8-Core CPU",
+      "16GB Unified Memory",
+      "512GB SSD Storage",
+      "13.6-inch Liquid Retina Display",
+      "1080p FaceTime HD Camera",
+      "MagSafe 3 Charging Port",
+      "Up to 18 hours battery life"
+    ],
     "rating": 4.9,
     "reviews": 2841,
     "price": 1299,
     "oldPrice": 1499,
-    "badges": ["bestseller"],
+    "badges": [
+      "bestseller"
+    ],
     "category": "ultrabook",
     "trending": true,
-    "rank": 1
+    "rank": 1,
+    "features": [
+      "Touch ID sensor",
+      "Force Touch trackpad",
+      "Fast Charging: 50% in 30 minutes",
+      "MIL-STD-810H military-grade durability",
+      "Fingerprint Sensor integrated with Power Key"
+    ],
+    "condition": "New"
   },
   {
     "id": 2,
     "brand": "ASUS ROG",
-    "name": "ROG Strix G16 — Eclipse Grey",
+    "name": "ROG Strix G16 - Eclipse Grey",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 4060", "32GB", "1TB SSD"],
+    "specs": [
+      "AMD Ryzen 9 7945HX",
+      "32GB DDR5-5600MHz RAM",
+      "1TB PCIe Gen4 NVMe SSD",
+      "NVIDIA GeForce RTX 4070 8GB GDDR6",
+      "16-inch QHD+ (2560x1600) 240Hz Display",
+      "Per-Key RGB Keyboard",
+      "90Whr Battery with Fast Charge"
+    ],
     "rating": 4.8,
     "reviews": 1562,
     "price": 1549,
     "oldPrice": 1799,
-    "badges": ["hot", "sale"],
+    "badges": [
+      "hot",
+      "sale"
+    ],
     "category": "gaming",
     "trending": true,
-    "rank": 2
+    "rank": 2,
+    "features": [
+      "Dolby Atmos Dual Stereo Speakers",
+      "Noise-canceling Array Microphones",
+      "Backlit Chiclet Keyboard",
+      "1080p FHD IR camera with Windows Hello support"
+    ],
+    "condition": "Open Box"
   },
   {
     "id": 3,
     "brand": "Lenovo",
     "name": "ThinkPad X1 Carbon Gen 12",
     "img": "assets/images/laptop_business.png",
-    "specs": ["Core Ultra 7", "32GB", "1TB SSD"],
+    "specs": [
+      "Intel Core i7-1355U vPro",
+      "16GB LPDDR5x RAM",
+      "512GB Gen4 PCIe NVMe Opal2 Solid State Drive",
+      "14-inch WUXGA (1920x1200) Low Power IPS",
+      "Integrated Intel Iris Xe Graphics",
+      "Fingerprint Reader on Power Button",
+      "dTPM 2.0 Security Chip"
+    ],
     "rating": 4.7,
     "reviews": 986,
     "price": 1199,
     "oldPrice": null,
-    "badges": ["new"],
+    "badges": [
+      "new"
+    ],
     "category": "business",
     "trending": true,
-    "rank": 3
+    "rank": 3,
+    "features": [
+      "Noise-canceling Array Microphones",
+      "Fast Charging: 50% in 30 minutes",
+      "Backlit Chiclet Keyboard",
+      "Precision Glass Touchpad"
+    ],
+    "condition": "Refurbished - Good"
   },
   {
     "id": 4,
     "brand": "Microsoft",
     "name": "Surface Laptop Studio 2",
     "img": "assets/images/hero_laptop.png",
-    "specs": ["RTX 4050", "32GB", "1TB SSD"],
+    "specs": [
+      "AMD Ryzen 9 7945HX3D",
+      "64GB DDR5-5200 RAM",
+      "4TB NVMe SSD",
+      "NVIDIA GeForce RTX 4090 16GB GDDR6",
+      "17-inch QHD (2560x1440) 240Hz",
+      "Aluminum CNC Chassis",
+      "Liquid Metal Thermal Compound"
+    ],
     "rating": 4.6,
     "reviews": 1243,
     "price": 1999,
     "oldPrice": 2299,
-    "badges": ["premium"],
+    "badges": [
+      "premium"
+    ],
     "category": "workstation",
     "trending": true,
-    "rank": 4
+    "rank": 4,
+    "features": [
+      "Thunderbolt 4 / USB4 40Gbps Support",
+      "Noise-canceling Array Microphones",
+      "MicroSD Card Reader",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3"
+    ],
+    "condition": "New"
   },
   {
     "id": 5,
     "brand": "Dell",
-    "name": "XPS 13 9340 — Platinum",
+    "name": "XPS 13 9340 - Platinum",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["Core Ultra 7", "16GB", "512GB SSD"],
+    "specs": [
+      "Intel Core Ultra 7 155H",
+      "32GB LPDDR5x-7467 MT/s",
+      "1TB PCIe 4.0 x4 SSD",
+      "14-inch OLED 2.8K (2880x1800) 120Hz Touch",
+      "Intel Arc Graphics",
+      "Thunderbolt 4 / USB4",
+      "FHD IR Camera with Windows Hello"
+    ],
     "rating": 4.5,
     "reviews": 842,
     "price": 1099,
     "oldPrice": 1299,
-    "badges": ["thin"],
+    "badges": [
+      "thin"
+    ],
     "category": "ultrabook",
     "trending": true,
-    "rank": 5
+    "rank": 5,
+    "features": [
+      "Fingerprint Sensor integrated with Power Key",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3",
+      "Fast Charging: 50% in 30 minutes",
+      "Noise-canceling Array Microphones"
+    ],
+    "condition": "Open Box"
   },
   {
     "id": 6,
     "brand": "MSI",
-    "name": "Stealth 16 Studio — Star Blue",
+    "name": "Stealth 16 Studio - Star Blue",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 4070", "32GB", "1TB SSD"],
+    "specs": [
+      "Intel Core i9-13900HX",
+      "64GB DDR5-5600MHz RAM",
+      "2TB PCIe Gen4 NVMe SSD",
+      "NVIDIA GeForce RTX 4080 12GB GDDR6",
+      "17.3-inch 4K Mini-LED 144Hz Display",
+      "Mechanical CherryMX Switches",
+      "Advanced Vapor Chamber Cooling"
+    ],
     "rating": 4.7,
     "reviews": 654,
     "price": 1849,
     "oldPrice": 2099,
-    "badges": ["gaming", "pro"],
+    "badges": [
+      "gaming",
+      "pro"
+    ],
     "category": "gaming",
     "trending": true,
-    "rank": 6
+    "rank": 6,
+    "features": [
+      "Liquid Metal Cooling System",
+      "Aluminum CNC Unibody Chassis",
+      "MIL-STD-810H military-grade durability",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3"
+    ],
+    "condition": "New"
   },
   {
     "id": 7,
     "brand": "ASUS",
-    "name": "Zenbook 14 OLED — Ponder Blue",
+    "name": "Zenbook 14 OLED - Ponder Blue",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["Ryzen 7", "16GB", "1TB SSD"],
+    "specs": [
+      "AMD Ryzen 7 8840U",
+      "16GB LPDDR5-6400MHz",
+      "1TB NVMe M.2 SSD",
+      "13.3-inch WUXGA (1920x1200) IPS Anti-glare",
+      "AMD Radeon 780M Graphics",
+      "Backlit Keyboard",
+      "Weight: 2.2 lbs (0.99 kg)"
+    ],
     "rating": 4.8,
     "reviews": 1120,
     "price": 949,
     "oldPrice": 1099,
-    "badges": ["oled", "sale"],
+    "badges": [
+      "oled",
+      "sale"
+    ],
     "category": "ultrabook",
     "trending": true,
-    "rank": 7
+    "rank": 7,
+    "features": [
+      "Thunderbolt 4 / USB4 40Gbps Support",
+      "Fingerprint Sensor integrated with Power Key",
+      "MicroSD Card Reader",
+      "Fast Charging: 50% in 30 minutes"
+    ],
+    "condition": "New"
   },
   {
     "id": 8,
     "brand": "Razer",
-    "name": "Blade 14 — Mercury White",
+    "name": "Blade 14 - Mercury White",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 4070", "16GB", "1TB SSD"],
+    "specs": [
+      "AMD Ryzen 7 7840HS",
+      "16GB DDR5-4800MHz RAM",
+      "512GB PCIe NVMe SSD",
+      "NVIDIA GeForce RTX 4060 8GB GDDR6",
+      "15.6-inch FHD (1920x1080) 165Hz IPS",
+      "4-Zone RGB Keyboard",
+      "Wi-Fi 6E & Bluetooth 5.3"
+    ],
     "rating": 4.9,
     "reviews": 432,
     "price": 2399,
     "oldPrice": null,
-    "badges": ["exclusive"],
+    "badges": [
+      "exclusive"
+    ],
     "category": "gaming",
     "trending": true,
-    "rank": 8
+    "rank": 8,
+    "features": [
+      "Fast Charging: 50% in 30 minutes",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3",
+      "Noise-canceling Array Microphones",
+      "Liquid Metal Cooling System"
+    ],
+    "condition": "New"
   },
   {
     "id": 9,
     "brand": "Acer",
-    "name": "Swift Go 14 — Pure Silver",
+    "name": "Swift Go 14 - Pure Silver",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["Core i7", "16GB", "512GB SSD"],
+    "specs": [
+      "AMD Ryzen 7 8840U",
+      "16GB LPDDR5-6400MHz",
+      "1TB NVMe M.2 SSD",
+      "13.3-inch WUXGA (1920x1200) IPS Anti-glare",
+      "AMD Radeon 780M Graphics",
+      "Backlit Keyboard",
+      "Weight: 2.2 lbs (0.99 kg)"
+    ],
     "rating": 4.4,
     "reviews": 765,
     "price": 749,
     "oldPrice": 899,
-    "badges": ["budget"],
+    "badges": [
+      "budget"
+    ],
     "category": "ultrabook",
     "trending": true,
-    "rank": 9
+    "rank": 9,
+    "features": [
+      "MicroSD Card Reader",
+      "Noise-canceling Array Microphones",
+      "Precision Glass Touchpad",
+      "Backlit Chiclet Keyboard"
+    ],
+    "condition": "Refurbished - Excellent"
   },
   {
     "id": 10,
     "brand": "HP",
-    "name": "Spectre x360 — Nightfall Black",
+    "name": "Spectre x360 - Nightfall Black",
     "img": "assets/images/hero_laptop.png",
-    "specs": ["Core Ultra 5", "16GB", "512GB SSD"],
+    "specs": [
+      "Intel Core i7-1355U vPro",
+      "16GB LPDDR5x RAM",
+      "512GB Gen4 PCIe NVMe Opal2 Solid State Drive",
+      "14-inch WUXGA (1920x1200) Low Power IPS",
+      "Integrated Intel Iris Xe Graphics",
+      "Fingerprint Reader on Power Button",
+      "dTPM 2.0 Security Chip"
+    ],
     "rating": 4.7,
     "reviews": 1290,
     "price": 1499,
     "oldPrice": 1649,
-    "badges": ["2-in-1"],
+    "badges": [
+      "2-in-1"
+    ],
     "category": "business",
     "trending": true,
-    "rank": 10
+    "rank": 10,
+    "features": [
+      "Dolby Atmos Dual Stereo Speakers",
+      "Fast Charging: 50% in 30 minutes",
+      "Liquid Metal Cooling System",
+      "Backlit Chiclet Keyboard"
+    ],
+    "condition": "Open Box"
   },
   {
     "id": 11,
     "brand": "LG",
-    "name": "Gram 17 — Charcoal Grey",
+    "name": "Gram 17 - Charcoal Grey",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["Core i7", "32GB", "1TB SSD"],
+    "specs": [
+      "Intel Core 7 150U",
+      "32GB DDR5-5200MHz",
+      "1TB PCIe NVMe SSD",
+      "16-inch FHD+ (1920x1200) IPS Display",
+      "Intel Graphics",
+      "1080p IR Camera",
+      "Wi-Fi 6E & Bluetooth 5.3"
+    ],
     "rating": 4.6,
     "reviews": 543,
     "price": 1599,
     "oldPrice": null,
-    "badges": ["light"],
+    "badges": [
+      "light"
+    ],
     "category": "business",
     "trending": false,
-    "rank": 11
+    "rank": 11,
+    "features": [
+      "MIL-STD-810H military-grade durability",
+      "MicroSD Card Reader",
+      "1080p FHD IR camera with Windows Hello support",
+      "Precision Glass Touchpad"
+    ],
+    "condition": "Open Box"
   },
   {
     "id": 12,
     "brand": "Framework",
-    "name": "Laptop 13 — DIY Edition",
+    "name": "Laptop 13 - DIY Edition",
     "img": "assets/images/laptop_business.png",
-    "specs": ["Ryzen 5", "Modular"],
+    "specs": [
+      "Intel Core i7-1355U vPro",
+      "16GB LPDDR5x RAM",
+      "512GB Gen4 PCIe NVMe Opal2 Solid State Drive",
+      "14-inch WUXGA (1920x1200) Low Power IPS",
+      "Integrated Intel Iris Xe Graphics",
+      "Fingerprint Reader on Power Button",
+      "dTPM 2.0 Security Chip"
+    ],
     "rating": 4.8,
     "reviews": 876,
     "price": 849,
     "oldPrice": null,
-    "badges": ["modular"],
+    "badges": [
+      "modular"
+    ],
     "category": "business",
     "trending": false,
-    "rank": 12
+    "rank": 12,
+    "features": [
+      "Noise-canceling Array Microphones",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3",
+      "Precision Glass Touchpad",
+      "Fingerprint Sensor integrated with Power Key"
+    ],
+    "condition": "New"
   },
   {
     "id": 13,
     "brand": "Samsung",
     "name": "Galaxy Book4 Ultra",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["Core Ultra 9", "RTX 4070"],
+    "specs": [
+      "AMD Ryzen 9 7945HX3D",
+      "64GB DDR5-5200 RAM",
+      "4TB NVMe SSD",
+      "NVIDIA GeForce RTX 4090 16GB GDDR6",
+      "17-inch QHD (2560x1440) 240Hz",
+      "Aluminum CNC Chassis",
+      "Liquid Metal Thermal Compound"
+    ],
     "rating": 4.7,
     "reviews": 321,
     "price": 2199,
     "oldPrice": 2399,
-    "badges": ["premium"],
+    "badges": [
+      "premium"
+    ],
     "category": "workstation",
     "trending": false,
-    "rank": 13
+    "rank": 13,
+    "features": [
+      "Liquid Metal Cooling System",
+      "MicroSD Card Reader",
+      "Fast Charging: 50% in 30 minutes",
+      "Dolby Atmos Dual Stereo Speakers"
+    ],
+    "condition": "Refurbished - Excellent"
   },
   {
     "id": 14,
     "brand": "Gigabyte",
-    "name": "AORUS 15 — Performance Black",
+    "name": "AORUS 15 - Performance Black",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 4060", "16GB", "512GB SSD"],
+    "specs": [
+      "Intel Core i9-13900HX",
+      "64GB DDR5-5600MHz RAM",
+      "2TB PCIe Gen4 NVMe SSD",
+      "NVIDIA GeForce RTX 4080 12GB GDDR6",
+      "17.3-inch 4K Mini-LED 144Hz Display",
+      "Mechanical CherryMX Switches",
+      "Advanced Vapor Chamber Cooling"
+    ],
     "rating": 4.5,
     "reviews": 432,
     "price": 1249,
     "oldPrice": 1399,
-    "badges": ["sale"],
+    "badges": [
+      "sale"
+    ],
     "category": "gaming",
     "trending": false,
-    "rank": 14
+    "rank": 14,
+    "features": [
+      "Fast Charging: 50% in 30 minutes",
+      "Liquid Metal Cooling System",
+      "MicroSD Card Reader",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3"
+    ],
+    "condition": "New"
   },
   {
     "id": 15,
     "brand": "Apple",
-    "name": "MacBook Pro 14 M3 — Space Black",
+    "name": "MacBook Pro 14 M3 - Space Black",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["M3 Pro", "18GB", "512GB SSD"],
+    "specs": [
+      "Apple M3 Max with 16-Core CPU",
+      "128GB Unified Memory",
+      "4TB SSD Storage",
+      "16.2-inch Liquid Retina XDR",
+      "40-Core GPU",
+      "Three Thunderbolt 4 ports",
+      "SDXC card slot & HDMI port"
+    ],
     "rating": 4.9,
     "reviews": 1432,
     "price": 1999,
     "oldPrice": null,
-    "badges": ["pro"],
+    "badges": [
+      "pro"
+    ],
     "category": "workstation",
     "trending": true,
-    "rank": 15
+    "rank": 15,
+    "features": [
+      "Touch ID sensor",
+      "Force Touch trackpad",
+      "Wi-Fi 6E (802.11ax) & Bluetooth 5.3",
+      "Aluminum CNC Unibody Chassis",
+      "Fast Charging: 50% in 30 minutes",
+      "Thunderbolt 4 / USB4 40Gbps Support"
+    ],
+    "condition": "New"
   },
   {
     "id": 16,
     "brand": "Dell",
-    "name": "G15 Gaming — Dark Shadow Grey",
+    "name": "G15 Gaming - Dark Shadow Grey",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 3050", "8GB", "512GB SSD"],
+    "specs": [
+      "AMD Ryzen 7 7840HS",
+      "16GB DDR5-4800MHz RAM",
+      "512GB PCIe NVMe SSD",
+      "NVIDIA GeForce RTX 4060 8GB GDDR6",
+      "15.6-inch FHD (1920x1080) 165Hz IPS",
+      "4-Zone RGB Keyboard",
+      "Wi-Fi 6E & Bluetooth 5.3"
+    ],
     "rating": 4.3,
     "reviews": 2100,
     "price": 799,
     "oldPrice": 949,
-    "badges": ["budget", "sale"],
+    "badges": [
+      "budget",
+      "sale"
+    ],
     "category": "gaming",
     "trending": false,
-    "rank": 16
+    "rank": 16,
+    "features": [
+      "MicroSD Card Reader",
+      "1080p FHD IR camera with Windows Hello support",
+      "Thunderbolt 4 / USB4 40Gbps Support",
+      "Backlit Chiclet Keyboard"
+    ],
+    "condition": "Open Box"
   },
   {
     "id": 17,
     "brand": "Apple",
-    "name": "MacBook Air 13 M3 — Silver",
+    "name": "MacBook Air 13 M3 - Silver",
     "img": "assets/images/laptop_macbook.png",
-    "specs": ["M3 Chip", "8GB", "256GB SSD"],
+    "specs": [
+      "Apple M3 Chip with 8-Core CPU",
+      "16GB Unified Memory",
+      "512GB SSD Storage",
+      "13.6-inch Liquid Retina Display",
+      "1080p FaceTime HD Camera",
+      "MagSafe 3 Charging Port",
+      "Up to 18 hours battery life"
+    ],
     "rating": 4.7,
     "reviews": 1876,
     "price": 1099,
     "oldPrice": null,
-    "badges": ["sale"],
+    "badges": [
+      "sale"
+    ],
     "category": "ultrabook",
     "trending": true,
-    "rank": 17
+    "rank": 17,
+    "features": [
+      "Touch ID sensor",
+      "Force Touch trackpad",
+      "MicroSD Card Reader",
+      "Fast Charging: 50% in 30 minutes",
+      "Noise-canceling Array Microphones",
+      "Fingerprint Sensor integrated with Power Key"
+    ],
+    "condition": "Refurbished - Good"
   },
   {
     "id": 18,
     "brand": "ASUS",
-    "name": "TUF Gaming A14 — Compact Power",
+    "name": "TUF Gaming A14 - Compact Power",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["RTX 4050", "16GB", "512GB SSD"],
+    "specs": [
+      "Intel Core i9-13900HX",
+      "64GB DDR5-5600MHz RAM",
+      "2TB PCIe Gen4 NVMe SSD",
+      "NVIDIA GeForce RTX 4080 12GB GDDR6",
+      "17.3-inch 4K Mini-LED 144Hz Display",
+      "Mechanical CherryMX Switches",
+      "Advanced Vapor Chamber Cooling"
+    ],
     "rating": 4.6,
     "reviews": 1234,
     "price": 1149,
     "oldPrice": 1349,
-    "badges": ["sale"],
+    "badges": [
+      "sale"
+    ],
     "category": "gaming",
     "trending": false,
-    "rank": 18
+    "rank": 18,
+    "features": [
+      "Backlit Chiclet Keyboard",
+      "Dolby Atmos Dual Stereo Speakers",
+      "Thunderbolt 4 / USB4 40Gbps Support",
+      "Aluminum CNC Unibody Chassis"
+    ],
+    "condition": "New"
   },
   {
     "id": 19,
     "brand": "HP",
-    "name": "Pavilion 16 — Value Performer",
+    "name": "Pavilion 16 - Value Performer",
     "img": "assets/images/hero_laptop.png",
-    "specs": ["Core i5", "8GB", "512GB SSD"],
+    "specs": [
+      "Intel Core Ultra 7 155H",
+      "32GB LPDDR5x-7467 MT/s",
+      "1TB PCIe 4.0 x4 SSD",
+      "14-inch OLED 2.8K (2880x1800) 120Hz Touch",
+      "Intel Arc Graphics",
+      "Thunderbolt 4 / USB4",
+      "FHD IR Camera with Windows Hello"
+    ],
     "rating": 4.3,
     "reviews": 1567,
     "price": 649,
     "oldPrice": 899,
-    "badges": ["budget", "sale"],
+    "badges": [
+      "budget",
+      "sale"
+    ],
     "category": "ultrabook",
     "trending": false,
-    "rank": 19
+    "rank": 19,
+    "features": [
+      "Fast Charging: 50% in 30 minutes",
+      "Liquid Metal Cooling System",
+      "Thunderbolt 4 / USB4 40Gbps Support",
+      "MicroSD Card Reader"
+    ],
+    "condition": "New"
   },
   {
     "id": 20,
     "brand": "Lenovo",
     "name": "Legion Pro 7i Gen 9",
     "img": "assets/images/laptop_gaming.png",
-    "specs": ["Core i9", "RTX 4070", "32GB", "1TB SSD"],
+    "specs": [
+      "AMD Ryzen 9 7945HX",
+      "32GB DDR5-5600MHz RAM",
+      "1TB PCIe Gen4 NVMe SSD",
+      "NVIDIA GeForce RTX 4070 8GB GDDR6",
+      "16-inch QHD+ (2560x1600) 240Hz Display",
+      "Per-Key RGB Keyboard",
+      "90Whr Battery with Fast Charge"
+    ],
     "rating": 4.8,
     "reviews": 1789,
     "price": 1899,
     "oldPrice": 2199,
-    "badges": ["hot", "sale"],
+    "badges": [
+      "hot",
+      "sale"
+    ],
     "category": "gaming",
     "trending": true,
-    "rank": 20
+    "rank": 20,
+    "features": [
+      "Precision Glass Touchpad",
+      "Noise-canceling Array Microphones",
+      "Backlit Chiclet Keyboard",
+      "Aluminum CNC Unibody Chassis"
+    ],
+    "condition": "New"
   }
 ]

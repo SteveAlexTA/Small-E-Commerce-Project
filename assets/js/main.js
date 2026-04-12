@@ -312,7 +312,7 @@ function openProductDetail(id) {
   if (!modal || !body) return;
 
   // Update URL (optional, hash-based for simplicity)
-  window.location.hash = `product-${id}`;
+  history.replaceState(null, null, `#product-${id}`);
 
   body.innerHTML = `
     <div class="detail-grid">
@@ -327,7 +327,7 @@ function openProductDetail(id) {
       <!-- Info -->
       <div class="detail-info">
         <div class="reveal-child">
-          <div class="detail-brand">${p.brand}</div>
+          <div class="detail-brand">${p.brand} &nbsp;&bull;&nbsp; Condition: <span style="color:var(--text-primary); font-weight:600;">${p.condition || 'New'}</span></div>
           <h1 class="detail-name">${p.name}</h1>
           <div class="detail-rating">
             <span class="stars">${starsHTML(p.rating)}</span>
@@ -359,6 +359,15 @@ function openProductDetail(id) {
             `).join('') || '<tr><td colspan="2">No detailed specs available</td></tr>'}
           </table>
         </div>
+
+        ${p.features && p.features.length > 0 ? `
+        <div class="reveal-child">
+          <div class="detail-section-title"><i class="fas fa-star"></i> Key Features</div>
+          <ul style="list-style:none; padding:0; margin-bottom:25px; color:var(--text-secondary);">
+            ${p.features.map(f => `<li style="margin-bottom:8px;"><i class="fas fa-circle" style="font-size:0.5rem; color:var(--primary); margin-right:10px; vertical-align:middle;"></i>${f}</li>`).join('')}
+          </ul>
+        </div>
+        ` : ''}
 
         <div class="detail-actions reveal-child">
           <div class="qty-input">
@@ -407,7 +416,7 @@ function closeProductDetail() {
   if (modal) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
-    window.location.hash = '';
+    history.replaceState(null, null, ' ');
   }
 }
 
