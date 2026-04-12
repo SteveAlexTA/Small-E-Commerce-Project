@@ -32,6 +32,11 @@ let sortMode = 'featured';
 let layoutMode = 'grid';
 let activeFilters = { brands: [], priceMax: 3000 };
 
+// Expose immediately so cart.js can read them at any time
+window.cart = cart;
+window.products = products;
+window.wishlist = wishlist;
+
 // ─── Helpers ───
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
@@ -54,6 +59,11 @@ function badgeHTML(badges) {
 function saveCart() { localStorage.setItem('nexuscart', JSON.stringify(cart)); }
 function saveWish() { localStorage.setItem('nexuswish', JSON.stringify(wishlist)); }
 
+// Expose for cart.js
+window.saveCart = saveCart;
+window.saveWish = saveWish;
+
+
 function addToCart(id, qtyToAdd = 1) {
   if (!currentUser) {
     showToast('Authentication Required', 'Please sign in to buy products.', 'fas fa-lock');
@@ -69,12 +79,27 @@ function addToCart(id, qtyToAdd = 1) {
   updateCartCount();
   const title = qtyToAdd > 1 ? `${qtyToAdd}x Added to Cart` : 'Added to Cart';
   showToast(title, `${p.name} added to your cart.`, 'fas fa-shopping-cart');
+
+  // If cart drawer is open, refresh it live
+  const drawer = document.getElementById('cart-drawer');
+  if (drawer && drawer.classList.contains('open')) {
+    if (typeof window._renderCartDrawer === 'function') window._renderCartDrawer();
+  }
 }
 
 function updateCartCount() {
   const total = cart.reduce((a, c) => a + c.qty, 0);
   $$('.cart-count').forEach(el => el.textContent = total);
+  // Sync drawer count badge if open
+  const badge = document.getElementById('cart-drawer-count');
+  if (badge) badge.textContent = total;
+  // Keep global references in sync
+  window.cart = cart;
+  window.products = products;
+  window.wishlist = wishlist;
 }
+
+window.updateCartCount = updateCartCount;
 
 function toggleWishlist(id, btn) {
   const idx = wishlist.indexOf(id);

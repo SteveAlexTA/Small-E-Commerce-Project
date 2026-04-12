@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
   <link rel="stylesheet" href="assets/css/product-detail.css" />
+  <link rel="stylesheet" href="assets/css/cart.css" />
 </head>
 <body>
 
@@ -378,6 +379,36 @@
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <!-- ═══════════════════════════════
+     CART DRAWER
+═══════════════════════════════ -->
+<div class="cart-overlay" id="cart-overlay" aria-hidden="true"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Shopping cart" role="dialog" aria-modal="true">
+  <!-- Cart Header -->
+  <div class="cart-header">
+    <div class="cart-header-left">
+      <div class="cart-header-icon"><i class="fas fa-shopping-cart"></i></div>
+      <div class="cart-title-wrap">
+        <h2>Shopping Cart <span class="cart-item-count-badge" id="cart-drawer-count">0</span></h2>
+        <div class="cart-subtitle">Review your selected items</div>
+      </div>
+    </div>
+    <button class="cart-close-btn" id="cart-drawer-close" aria-label="Close cart">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Cart Body (scrollable) -->
+  <div class="cart-body" id="cart-drawer-body">
+    <!-- Populated by cart.js -->
+  </div>
+
+  <!-- Cart Footer (summary + checkout) -->
+  <div class="cart-footer" id="cart-drawer-footer">
+    <!-- Populated by cart.js -->
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════
      PRODUCT DETAIL MODAL
 ═══════════════════════════════ -->
 <div class="product-detail-modal" id="product-detail-modal" aria-hidden="true">
@@ -405,5 +436,6 @@
 <!-- ─── Scripts ─── -->
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/cart.js"></script>
 </body>
 </html>
