@@ -1,0 +1,347 @@
+/* ================================================
+   NEXUS TECH - Product Detail Styles
+   ================================================ */
+
+.product-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px;
+}
+
+.product-detail-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.product-detail-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(8, 9, 13, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.product-detail-content {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 90vh;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+  transform: scale(0.95) translateY(20px);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.product-detail-modal.active .product-detail-content {
+  transform: scale(1) translateY(0);
+}
+
+.product-detail-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product-detail-content::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 99px;
+}
+
+.product-detail-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.product-detail-close:hover {
+  background: var(--accent-warm);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* ─── Grid Layout ─── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  padding: 40px;
+}
+
+@media (max-width: 992px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 30px 20px;
+  }
+}
+
+/* ─── Image Column ─── */
+.detail-gallery {
+  position: sticky;
+  top: 0;
+}
+
+.hero-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 20px;
+  transition: transform 0.6s ease;
+}
+
+.hero-img-wrap:hover .hero-img {
+  transform: scale(1.05);
+}
+
+.detail-badges {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Info Column ─── */
+.detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-brand {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.detail-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.detail-rating .stars {
+  color: var(--star-color);
+  font-size: 1rem;
+}
+
+.rating-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.detail-price-box {
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.detail-price-box .price-current {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.detail-price-box .price-old {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.detail-price-box .price-discount {
+  background: rgba(247, 37, 133, 0.15);
+  color: var(--accent-warm);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ─── Actions ─── */
+.detail-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.qty-input {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.qty-btn {
+  width: 44px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.qty-btn:hover {
+  background: var(--bg-glass);
+}
+
+.qty-val {
+  width: 40px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-actions .btn-primary {
+  flex: 1;
+  height: 48px;
+  font-size: 1rem;
+}
+
+/* ─── Tabs/Sections ─── */
+.detail-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+/* ─── Specs Table ─── */
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+
+.specs-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.specs-table tr:last-child {
+  border-bottom: none;
+}
+
+.specs-table td {
+  padding: 12px 0;
+  font-size: 0.9rem;
+}
+
+.specs-label {
+  width: 140px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.specs-value {
+  color: var(--text-primary);
+}
+
+/* ─── Related Products ─── */
+.related-products {
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--border);
+}
+
+.related-header {
+  margin-bottom: 24px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-child {
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+.reveal-child:nth-child(1) { animation-delay: 0.1s; }
+.reveal-child:nth-child(2) { animation-delay: 0.2s; }
+.reveal-child:nth-child(3) { animation-delay: 0.3s; }
+.reveal-child:nth-child(4) { animation-delay: 0.4s; }
+.reveal-child:nth-child(5) { animation-delay: 0.5s; }

@@ -54,7 +54,7 @@ function badgeHTML(badges) {
 function saveCart() { localStorage.setItem('nexuscart', JSON.stringify(cart)); }
 function saveWish() { localStorage.setItem('nexuswish', JSON.stringify(wishlist)); }
 
-function addToCart(id) {
+function addToCart(id, qtyToAdd = 1) {
   if (!currentUser) {
     showToast('Authentication Required', 'Please sign in to buy products.', 'fas fa-lock');
     openAuthModal();
@@ -63,11 +63,12 @@ function addToCart(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
   const existing = cart.find(x => x.id === id);
-  if (existing) existing.qty++;
-  else cart.push({ id, qty: 1 });
+  if (existing) existing.qty += qtyToAdd;
+  else cart.push({ id, qty: qtyToAdd });
   saveCart();
   updateCartCount();
-  showToast('Added to Cart', `${p.name} added to your cart.`, 'fas fa-shopping-cart');
+  const title = qtyToAdd > 1 ? `${qtyToAdd}x Added to Cart` : 'Added to Cart';
+  showToast(title, `${p.name} added to your cart.`, 'fas fa-shopping-cart');
 }
 
 function updateCartCount() {
@@ -114,7 +115,7 @@ function renderTrending() {
   if (!wrap) return;
   const list = products.filter(p => p.trending).sort((a, b) => a.rank - b.rank);
   wrap.innerHTML = list.map(p => `
-    <div class="trending-card" data-id="${p.id}">
+    <div class="trending-card" data-id="${p.id}" onclick="openProductDetail(${p.id})">
       <div class="trending-card-img-wrap">
         <div class="trending-card-rank">#${p.rank}</div>
         <img src="${p.img}" alt="${p.name}" class="trending-card-img" loading="lazy">
@@ -297,9 +298,150 @@ function renderCatalog() {
 
 // ─── Quick View ───
 function quickView(id) {
+  openProductDetail(id);
+}
+
+function openProductDetail(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  showToast('Quick View', `${p.name} — ${fmt(p.price)}. Full product page coming soon!`, 'fas fa-eye');
+
+  const modal = $('#product-detail-modal');
+  const body = $('#pd-body');
+  const relatedGrid = $('#pd-related-grid');
+
+  if (!modal || !body) return;
+
+  // Update URL (optional, hash-based for simplicity)
+  window.location.hash = `product-${id}`;
+
+  body.innerHTML = `
+    <div class="detail-grid">
+      <!-- Gallery -->
+      <div class="detail-gallery reveal-child">
+        <div class="hero-img-wrap">
+          <img src="${p.img}" alt="${p.name}" class="hero-img">
+          <div class="detail-badges">${badgeHTML(p.badges)}</div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="detail-info">
+        <div class="reveal-child">
+          <div class="detail-brand">${p.brand}</div>
+          <h1 class="detail-name">${p.name}</h1>
+          <div class="detail-rating">
+            <span class="stars">${starsHTML(p.rating)}</span>
+            <span class="rating-text">${p.rating} (${p.reviews.toLocaleString()} reviews)</span>
+          </div>
+        </div>
+
+        <div class="detail-price-box reveal-child">
+          <div class="price-current">${fmt(p.price)}</div>
+          ${p.oldPrice ? `<div class="price-old">${fmt(p.oldPrice)}</div>` : ''}
+          ${p.oldPrice ? `<div class="price-discount">-${Math.round((1 - p.price / p.oldPrice) * 100)}%</div>` : ''}
+        </div>
+
+        <div class="detail-description reveal-child">
+          <div class="detail-section-title"><i class="fas fa-info-circle"></i> Description</div>
+          <p>The <strong>${p.name}</strong> is a premium ${p.category} laptop designed for performance and style. 
+          Featuring ${p.specs.join(', ')}, it offers an unmatched experience for both professionals and enthusiasts alike.</p>
+        </div>
+
+        <div class="reveal-child">
+          <div class="detail-section-title"><i class="fas fa-microchip"></i> Technical Specifications</div>
+          <table class="specs-table">
+            ${p.specs.map(s => `
+              <tr>
+                <td class="specs-value" colspan="2">
+                  <i class="fas fa-check" style="color:var(--primary); margin-right:8px;"></i>${s}
+                </td>
+              </tr>
+            `).join('') || '<tr><td colspan="2">No detailed specs available</td></tr>'}
+          </table>
+        </div>
+
+        <div class="detail-actions reveal-child">
+          <div class="qty-input">
+            <button class="qty-btn" onclick="updateDetailQty(-1)"><i class="fas fa-minus"></i></button>
+            <span class="qty-val" id="pd-qty">1</span>
+            <button class="qty-btn" onclick="updateDetailQty(1)"><i class="fas fa-plus"></i></button>
+          </div>
+          <button class="btn btn-primary" onclick="addDetailToCart(${p.id})">
+            <i class="fas fa-shopping-cart"></i> Add to Cart
+          </button>
+          <button class="btn btn-icon ${wishlist.includes(p.id) ? 'active' : ''}" 
+            onclick="toggleWishlist(${p.id}, this)"
+            style="color: ${wishlist.includes(p.id) ? 'var(--accent-warm)' : 'var(--text-secondary)'}">
+            <i class="${wishlist.includes(p.id) ? 'fas' : 'far'} fa-heart"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Render Related
+  const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
+  relatedGrid.innerHTML = related.map(x => `
+    <div class="product-card" style="margin:0" onclick="openProductDetail(${x.id})">
+      <div class="product-card-img-wrap" style="aspect-ratio:3/2">
+        <img src="${x.img}" alt="${x.name}" class="product-card-img">
+      </div>
+      <div class="product-card-body" style="padding:15px">
+        <div class="product-name" style="font-size:0.85rem">${x.name}</div>
+        <div class="product-price-row" style="margin-top:5px">
+          <span class="price-current" style="font-size:0.9rem">${fmt(x.price)}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Reset scroll
+  $('#pd-content').scrollTop = 0;
+}
+
+function closeProductDetail() {
+  const modal = $('#product-detail-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    window.location.hash = '';
+  }
+}
+
+// Global detail helpers
+window.updateDetailQty = (delta) => {
+  const el = $('#pd-qty');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 1) val = 1;
+  el.textContent = val;
+};
+
+window.addDetailToCart = (id) => {
+  const qty = parseInt($('#pd-qty').textContent);
+  addToCart(id, qty);
+};
+
+// Init detail-specific events
+function initProductDetail() {
+  const closeBtn = $('#pd-close');
+  const backdrop = $('#pd-backdrop');
+
+  closeBtn?.addEventListener('click', closeProductDetail);
+  backdrop?.addEventListener('click', closeProductDetail);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeProductDetail();
+  });
+
+  // Handle hash on load
+  if (window.location.hash.startsWith('#product-')) {
+    const id = parseInt(window.location.hash.split('-')[1]);
+    setTimeout(() => openProductDetail(id), 500);
+  }
 }
 
 // ─── Category Chips ───
@@ -766,15 +908,16 @@ function initSearch() {
 
 function renderProductCard(p) {
   return `
-    <div class="product-card reveal" data-id="${p.id}">
+    <div class="product-card reveal" data-id="${p.id}" onclick="openProductDetail(${p.id})">
       <div class="product-card-img-wrap">
-        <img src="${p.img}" alt="${p.name}" class="product-card-img">
+        <img src="${p.img}" alt="${p.name}" class="product-card-img" loading="lazy">
         <div class="product-card-badges">${badgeHTML(p.badges)}</div>
         <div class="product-card-actions">
-          <button class="action-btn ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)">
+          <button class="action-btn ${wishlist.includes(p.id) ? 'active' : ''}" title="Wishlist"
+            onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)">
             <i class="${wishlist.includes(p.id) ? 'fas' : 'far'} fa-heart"></i>
           </button>
-          <button class="action-btn" onclick="event.stopPropagation(); quickView(${p.id})">
+          <button class="action-btn" title="Quick View" onclick="event.stopPropagation(); quickView(${p.id})">
             <i class="fas fa-eye"></i>
           </button>
         </div>
@@ -782,7 +925,9 @@ function renderProductCard(p) {
       <div class="product-card-body">
         <div class="product-brand">${p.brand}</div>
         <div class="product-name">${p.name}</div>
-        <div class="product-specs">${p.specs.map(s => `<span class="spec-tag">${s}</span>`).join('')}</div>
+        <div class="product-specs">
+          ${p.specs.map(s => `<span class="spec-tag">${s}</span>`).join('')}
+        </div>
         <div class="product-rating">
           <span class="stars">${starsHTML(p.rating)}</span>
           <span class="rating-num" style="font-size:0.8rem;font-weight:600;color:var(--text-secondary)">${p.rating}</span>
@@ -823,6 +968,7 @@ function renderAll() {
   initThemeToggle();
   initRevealAnimation();
   initAuth();
+  initProductDetail();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
+  <link rel="stylesheet" href="assets/css/product-detail.css" />
 </head>
 <body>
 
@@ -402,6 +403,31 @@
 
 <!-- ─── Toast Container ─── -->
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<!-- ═══════════════════════════════
+     PRODUCT DETAIL MODAL
+═══════════════════════════════ -->
+<div class="product-detail-modal" id="product-detail-modal" aria-hidden="true">
+  <div class="product-detail-backdrop" id="pd-backdrop"></div>
+  <div class="product-detail-content" id="pd-content">
+    <button class="product-detail-close" id="pd-close" aria-label="Close product details">
+      <i class="fas fa-times"></i>
+    </button>
+    
+    <div id="pd-body">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="related-products">
+      <div class="related-header">
+        <h3 class="detail-section-title"><i class="fas fa-layer-group"></i> Similar Products</h3>
+      </div>
+      <div class="related-grid" id="pd-related-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ─── Scripts ─── -->
 <script src="assets/js/auth.js"></script>
