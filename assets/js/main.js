@@ -72,15 +72,26 @@ function addToCart(id, qtyToAdd = 1) {
   }
   const p = products.find(x => x.id === id);
   if (!p) return;
+
+  // 1. Optimistic local update
   const existing = cart.find(x => x.id === id);
   if (existing) existing.qty += qtyToAdd;
   else cart.push({ id, qty: qtyToAdd });
   saveCart();
   updateCartCount();
+
   const title = qtyToAdd > 1 ? `${qtyToAdd}x Added to Cart` : 'Added to Cart';
   showToast(title, `${p.name} added to your cart.`, 'fas fa-shopping-cart');
 
-  // If cart drawer is open, refresh it live
+  // 2. Sync to backend API (fire-and-forget, graceful fallback)
+  if (typeof authFetch === 'function') {
+    authFetch(`${API_BASE_URL}/api/cart`, {
+      method: 'POST',
+      body: JSON.stringify({ product_id: id, qty: qtyToAdd })
+    }).catch(err => console.warn('[Cart] API sync failed (addToCart):', err));
+  }
+
+  // 3. If cart drawer is open, refresh it live
   const drawer = document.getElementById('cart-drawer');
   if (drawer && drawer.classList.contains('open')) {
     if (typeof window._renderCartDrawer === 'function') window._renderCartDrawer();

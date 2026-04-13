@@ -119,6 +119,11 @@
         renderCartDrawer();
         if (typeof showToast === 'function')
           showToast('Cart Cleared', 'All items have been removed.', 'fas fa-trash-alt');
+        // Sync to API
+        if (typeof authFetch === 'function') {
+          authFetch(`${_apiBase()}/api/cart`, { method: 'DELETE' })
+            .catch(err => console.warn('[Cart] API sync failed (clear):', err));
+        }
       }
     });
   }
@@ -250,17 +255,32 @@
     const cart = window.cart || [];
     const entry = cart.find((e) => e.id === id);
     if (!entry) return;
-    entry.qty = Math.max(1, entry.qty + delta);
+    const newQty = Math.max(1, entry.qty + delta);
+    entry.qty = newQty;
     if (typeof window.saveCart === 'function') window.saveCart();
     if (typeof window.updateCartCount === 'function') window.updateCartCount();
     bumpCartBtn();
     renderCartDrawer();
+
+    // Sync to API
+    if (typeof authFetch === 'function') {
+      authFetch(`${_apiBase()}/api/cart/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ qty: newQty })
+      }).catch(err => console.warn('[Cart] API sync failed (updateQty):', err));
+    }
   }
 
   function removeFromCart(id) {
     window.cart = (window.cart || []).filter((e) => e.id !== id);
     if (typeof window.saveCart === 'function') window.saveCart();
     if (typeof window.updateCartCount === 'function') window.updateCartCount();
+
+    // Sync to API
+    if (typeof authFetch === 'function') {
+      authFetch(`${_apiBase()}/api/cart/${id}`, { method: 'DELETE' })
+        .catch(err => console.warn('[Cart] API sync failed (remove):', err));
+    }
 
     // Animate removal
     const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
@@ -288,6 +308,12 @@
   // ─── Helpers ───
   function fmtPrice(n) {
     return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  /** Resolve API base URL consistently with main.js / auth.js */
+  function _apiBase() {
+    if (typeof API_BASE_URL !== 'undefined') return API_BASE_URL;
+    return window.location.port === '5000' ? '' : 'http://localhost:5000';
   }
 
   // ─── Init ───

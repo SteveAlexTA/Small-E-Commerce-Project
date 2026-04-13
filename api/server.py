@@ -47,10 +47,32 @@ class Product(db.Model):
     features = db.Column(db.Text) # Stored as JSON string
     condition = db.Column(db.String(50))
 
+class CartItem(db.Model):
+    __tablename__ = 'cart_item'
+    id         = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    qty        = db.Column(db.Integer, default=1, nullable=False)
+    __table_args__ = (db.UniqueConstraint('user_id', 'product_id', name='uq_user_product'),)
+
 # Simple Session Store (In-memory)
 sessions = {}
 
 # === Helper Functions ===
+
+def get_session_user(req):
+    """Return the user dict from the in-memory sessions store, or None."""
+    auth = req.headers.get('Authorization', '')
+    if not auth.startswith('Bearer '):
+        return None
+    token = auth[7:]
+    session = sessions.get(token)
+    if not session:
+        return None
+    if datetime.now().timestamp() * 1000 > session['expiresAt']:
+        sessions.pop(token, None)
+        return None
+    return session['user']
 
 def get_product_json(p):
     return {
@@ -258,6 +280,89 @@ def delete_user(uid):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User deleted'})
+
+# ─── API Routes: Cart ───
+
+@app.route('/api/cart', methods=['GET'])
+def get_cart():
+    """Return the authenticated user's cart items with full product details."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    items = CartItem.query.filter_by(user_id=user['id']).all()
+    result = []
+    for item in items:
+        p = Product.query.get(item.product_id)
+        if p:
+            result.append({
+                'id': item.id,
+                'product_id': item.product_id,
+                'qty': item.qty,
+                'product': get_product_json(p)
+            })
+    return jsonify(result)
+
+@app.route('/api/cart', methods=['POST'])
+def add_to_cart():
+    """Add or update a product in the cart (upsert by product_id)."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    data = request.get_json()
+    product_id = data.get('product_id')
+    qty = int(data.get('qty', 1))
+    if not product_id:
+        return jsonify({'error': 'product_id required'}), 400
+    if not Product.query.get(product_id):
+        return jsonify({'error': 'Product not found'}), 404
+    existing = CartItem.query.filter_by(user_id=user['id'], product_id=product_id).first()
+    if existing:
+        existing.qty += qty
+    else:
+        existing = CartItem(user_id=user['id'], product_id=product_id, qty=qty)
+        db.session.add(existing)
+    db.session.commit()
+    return jsonify({'id': existing.id, 'product_id': product_id, 'qty': existing.qty}), 201
+
+@app.route('/api/cart/<int:product_id>', methods=['PUT'])
+def update_cart_item(product_id):
+    """Set an exact qty for a product in the cart."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    data = request.get_json()
+    qty = int(data.get('qty', 1))
+    item = CartItem.query.filter_by(user_id=user['id'], product_id=product_id).first()
+    if not item:
+        return jsonify({'error': 'Not found'}), 404
+    if qty <= 0:
+        db.session.delete(item)
+    else:
+        item.qty = qty
+    db.session.commit()
+    return jsonify({'product_id': product_id, 'qty': qty})
+
+@app.route('/api/cart/<int:product_id>', methods=['DELETE'])
+def remove_from_cart(product_id):
+    """Remove a specific product from the cart."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    item = CartItem.query.filter_by(user_id=user['id'], product_id=product_id).first()
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+    return jsonify({'message': 'Removed'})
+
+@app.route('/api/cart', methods=['DELETE'])
+def clear_cart():
+    """Remove all items from the authenticated user's cart."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    CartItem.query.filter_by(user_id=user['id']).delete()
+    db.session.commit()
+    return jsonify({'message': 'Cart cleared'})
 
 @app.route('/api/health')
 def health():

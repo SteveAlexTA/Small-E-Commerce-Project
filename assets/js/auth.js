@@ -26,6 +26,60 @@ function handleForcedLogout() {
   performLogout(false); // No confirm on forced
 }
 
+/**
+ * Fetch the user's cart from the backend and merge into the local cart.
+ * Server items take priority for qty; local-only items are kept.
+ * Called after every successful login.
+ */
+async function loadServerCart() {
+  try {
+    const resp = await authFetch(`${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : (window.location.port === '5000' ? '' : 'http://localhost:5000')}/api/cart`);
+    if (!resp.ok) return;
+    const serverItems = await resp.json(); // [{product_id, qty, product:{...}}, ...]
+
+    // Build a map of server items keyed by product_id
+    const serverMap = {};
+    serverItems.forEach(item => { serverMap[item.product_id] = item.qty; });
+
+    // Merge: use server qty for items on server, keep local-only items
+    const localCart = JSON.parse(localStorage.getItem('nexuscart')) || [];
+    const merged = [];
+
+    // Add all server items (server qty is authoritative)
+    serverItems.forEach(item => {
+      merged.push({ id: item.product_id, qty: item.qty });
+    });
+
+    // Add local-only items that didn't exist on server
+    localCart.forEach(local => {
+      if (!serverMap[local.id]) {
+        merged.push(local);
+        // Push local-only item to server too
+        if (typeof authFetch === 'function') {
+          authFetch(`${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:5000'}/api/cart`, {
+            method: 'POST',
+            body: JSON.stringify({ product_id: local.id, qty: local.qty })
+          }).catch(() => {});
+        }
+      }
+    });
+
+    // Write merged result back
+    localStorage.setItem('nexuscart', JSON.stringify(merged));
+
+    // Sync into main.js cart array via its saveCart/updateCartCount globals
+    if (Array.isArray(window.cart)) {
+      window.cart.length = 0;
+      merged.forEach(item => window.cart.push(item));
+    }
+    if (typeof window.updateCartCount === 'function') window.updateCartCount();
+
+    console.log('[Cart] Loaded from server:', merged.length, 'item(s)');
+  } catch (err) {
+    console.warn('[Cart] Could not load server cart:', err);
+  }
+}
+
 function performLogout(ask = true) {
   // Removing confirm() to ensure instant logout as requested by the user's flow
   console.log('[Auth] performLogout called. Logging out user:', currentUser?.email);
@@ -33,6 +87,10 @@ function performLogout(ask = true) {
   localStorage.removeItem('nexusCurrentUser');
   localStorage.removeItem('nexusToken');
   localStorage.removeItem('nexusExpiresAt');
+  // Clear local cart on logout so next user starts fresh
+  localStorage.removeItem('nexuscart');
+  if (Array.isArray(window.cart)) window.cart.length = 0;
+  if (typeof window.updateCartCount === 'function') window.updateCartCount();
   if (sessionTimeout) clearTimeout(sessionTimeout);
   
   updateAuthUI();
@@ -231,6 +289,8 @@ function initAuth() {
       updateAuthUI();
       closeAuthModal();
       if (typeof showToast === 'function') showToast('Success', 'Logged in successfully!', 'fas fa-check-circle');
+      // Load & merge server cart
+      loadServerCart();
     } catch (err) {
       console.error(err);
       if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
@@ -297,6 +357,8 @@ function initAuth() {
       updateAuthUI();
       closeAuthModal();
       if (typeof showToast === 'function') showToast('Success', 'Logged in as Admin!', 'fas fa-shield-alt');
+      // Admin carts can be synced too
+      loadServerCart();
     } catch (err) {
       console.error(err);
       if (typeof showToast === 'function') showToast('Error', 'Server connection failed.', 'fas fa-wifi');
