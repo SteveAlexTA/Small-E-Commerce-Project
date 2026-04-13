@@ -157,6 +157,8 @@ function updateAuthUI() {
     document.querySelector('#drop-admin').style.display = 'none';
     document.querySelector('#drop-dashboard').style.display = 'none';
   }
+  // Re-evaluate cart badge visibility based on new auth state
+  if (typeof window.updateCartCount === 'function') window.updateCartCount();
 }
 
 function checkSessionExpiration() {

@@ -99,9 +99,14 @@ function addToCart(id, qtyToAdd = 1) {
 }
 
 function updateCartCount() {
-  const total = cart.reduce((a, c) => a + c.qty, 0);
-  $$('.cart-count').forEach(el => el.textContent = total);
-  // Sync drawer count badge if open
+  const isLoggedIn = typeof currentUser !== 'undefined' && currentUser;
+  const total = isLoggedIn ? cart.reduce((a, c) => a + c.qty, 0) : 0;
+  $$('.cart-count').forEach(el => {
+    el.textContent = total;
+    // Only show badge when logged in AND has items
+    el.style.display = (isLoggedIn && total > 0) ? 'inline-flex' : 'none';
+  });
+  // Sync drawer count badge
   const badge = document.getElementById('cart-drawer-count');
   if (badge) badge.textContent = total;
   // Keep global references in sync
@@ -150,11 +155,12 @@ function renderTrending() {
   const wrap = $('#trending-scroll');
   if (!wrap) return;
   const list = products.filter(p => p.trending).sort((a, b) => a.rank - b.rank);
+  const imgFallback = `this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22 viewBox=%220 0 72 72%22%3E%3Crect width=%2272%22 height=%2272%22 fill=%22%23242630%22/%3E%3Ctext x=%2236%22 y=%2242%22 text-anchor=%22middle%22 font-size=%2228%22%3E💻%3C/text%3E%3C/svg%3E'`;
   wrap.innerHTML = list.map(p => `
     <div class="trending-card" data-id="${p.id}" onclick="openProductDetail(${p.id})">
       <div class="trending-card-img-wrap">
         <div class="trending-card-rank">#${p.rank}</div>
-        <img src="${p.img}" alt="${p.name}" class="trending-card-img" loading="lazy">
+        <img src="${p.img}" alt="${p.name}" class="trending-card-img" loading="lazy" onerror="${imgFallback}">
         <div class="trending-card-overlay"></div>
       </div>
       <div class="trending-card-body">
@@ -936,10 +942,11 @@ function initSearch() {
 }
 
 function renderProductCard(p) {
+  const imgFallback = `this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22 viewBox=%220 0 72 72%22%3E%3Crect width=%2272%22 height=%2272%22 fill=%22%23242630%22/%3E%3Ctext x=%2236%22 y=%2242%22 text-anchor=%22middle%22 font-size=%2228%22%3E💻%3C/text%3E%3C/svg%3E'`;
   return `
     <div class="product-card reveal" data-id="${p.id}" onclick="openProductDetail(${p.id})">
       <div class="product-card-img-wrap">
-        <img src="${p.img}" alt="${p.name}" class="product-card-img" loading="lazy">
+        <img src="${p.img}" alt="${p.name}" class="product-card-img" loading="lazy" onerror="${imgFallback}">
         <div class="product-card-badges">${badgeHTML(p.badges)}</div>
         <div class="product-card-actions">
           <button class="action-btn ${wishlist.includes(p.id) ? 'active' : ''}" title="Wishlist"

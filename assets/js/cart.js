@@ -110,10 +110,11 @@
     // Wire up item controls
     bindItemControls();
 
-    // Clear all
+    // Clear all — mutate in-place to keep main.js's cart reference valid
     document.getElementById('cart-clear-all-btn')?.addEventListener('click', () => {
       if (confirm('Remove all items from your cart?')) {
-        window.cart = [];
+        // Splice instead of replace to keep the same array reference
+        (window.cart || []).splice(0);
         if (typeof window.saveCart === 'function') window.saveCart();
         if (typeof window.updateCartCount === 'function') window.updateCartCount();
         renderCartDrawer();
@@ -131,10 +132,12 @@
   function cartItemHTML(entry) {
     const { product: p, qty } = entry;
     const lineTotal = p.price * qty;
+    // Fallback placeholder if image fails to load
+    const imgFallback = `this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22 viewBox=%220 0 72 72%22%3E%3Crect width=%2272%22 height=%2272%22 fill=%22%23242630%22/%3E%3Ctext x=%2236%22 y=%2242%22 text-anchor=%22middle%22 font-size=%2228%22%3E💻%3C/text%3E%3C/svg%3E'`;
     return `
       <div class="cart-item" data-id="${p.id}">
         <div class="cart-item-img-wrap">
-          <img src="${p.img}" alt="${p.name}" class="cart-item-img" loading="lazy">
+          <img src="${p.img}" alt="${p.name}" class="cart-item-img" loading="lazy" onerror="${imgFallback}">
         </div>
         <div class="cart-item-details">
           <div class="cart-item-brand">${p.brand}</div>
@@ -272,7 +275,10 @@
   }
 
   function removeFromCart(id) {
-    window.cart = (window.cart || []).filter((e) => e.id !== id);
+    // Splice in-place so main.js's `cart` and window.cart remain the same array reference
+    const cartArr = window.cart || [];
+    const idx = cartArr.findIndex((e) => e.id === id);
+    if (idx !== -1) cartArr.splice(idx, 1);
     if (typeof window.saveCart === 'function') window.saveCart();
     if (typeof window.updateCartCount === 'function') window.updateCartCount();
 
@@ -282,7 +288,7 @@
         .catch(err => console.warn('[Cart] API sync failed (remove):', err));
     }
 
-    // Animate removal
+    // Animate removal then re-render
     const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
     if (itemEl) {
       itemEl.style.transition = 'opacity 0.25s, transform 0.25s';
