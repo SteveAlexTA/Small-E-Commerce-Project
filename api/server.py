@@ -5,6 +5,8 @@ import json
 import os
 import secrets
 from datetime import datetime, timedelta
+import time
+import random
 
 # Find project root (D:\Small-E-Commerce-Project)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -54,6 +56,24 @@ class CartItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
     qty        = db.Column(db.Integer, default=1, nullable=False)
     __table_args__ = (db.UniqueConstraint('user_id', 'product_id', name='uq_user_product'),)
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), default='completed')
+    shipping_status = db.Column(db.String(50), default='processing')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class OrderItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id', ondelete='CASCADE'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    product_name = db.Column(db.String(200), nullable=False)
+    product_img = db.Column(db.String(255), nullable=True)
+    qty = db.Column(db.Integer, nullable=False)
+    price_at_purchase = db.Column(db.Integer, nullable=False)
 
 # Simple Session Store (In-memory)
 sessions = {}
@@ -146,6 +166,16 @@ def create_admin():
 with app.app_context():
     try:
         db.create_all()
+        # Manual migration for shipping_status column if it doesn't exist
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE `order` ADD COLUMN `shipping_status` VARCHAR(50) DEFAULT 'processing'"))
+            db.session.commit()
+            print("Done: Added shipping_status column to order table.")
+        except Exception:
+            # Column likely already exists
+            db.session.rollback()
+
         migrate_products()
         create_admin()
         print("Done: MySQL connection and schema verification successful.")
@@ -363,6 +393,134 @@ def clear_cart():
     CartItem.query.filter_by(user_id=user['id']).delete()
     db.session.commit()
     return jsonify({'message': 'Cart cleared'})
+
+@app.route('/api/checkout', methods=['POST'])
+def checkout():
+    """Simulate a transaction, store the order, and clear the cart."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    payment_method = data.get('payment_method', 'Credit Card')
+    
+    # 1. Calculate total from current cart
+    items = CartItem.query.filter_by(user_id=user['id']).all()
+    if not items:
+        return jsonify({'error': 'Cart is empty'}), 400
+    
+    subtotal = 0
+    for item in items:
+        p = Product.query.get(item.product_id)
+        if p:
+            subtotal += p.price * item.qty
+            
+    if subtotal == 0:
+        return jsonify({'error': 'No valid products in cart'}), 400
+        
+    tax = round(subtotal * 0.08)
+    shipping = 0 if subtotal >= 1500 else 29
+    total = subtotal + tax + shipping
+    
+    # 2. Simulate processing delay
+    time.sleep(1.5)
+    
+    # 3. Randomized success/failure (15% failure rate)
+    if random.random() < 0.15:
+        # Simulate different failure messages
+        errors = [
+            "Card declined by the issuing bank.",
+            "Insufficient funds for this transaction.",
+            "Payment gateway timeout. Please try again.",
+            "Invalid billing address provided."
+        ]
+        return jsonify({'error': random.choice(errors)}), 400
+    
+    # 4. Success: Store Order & Clear Cart
+    try:
+        new_order = Order(
+            user_id=user['id'],
+            total_amount=total,
+            payment_method=payment_method,
+            status='completed',
+            shipping_status='processing'
+        )
+        db.session.add(new_order)
+        db.session.flush() # Get order ID before committing
+        
+        # Save Order Items (snapshot)
+        for item in items:
+            p = Product.query.get(item.product_id)
+            if p:
+                oi = OrderItem(
+                    order_id=new_order.id,
+                    product_id=p.id,
+                    product_name=p.name,
+                    product_img=p.img,
+                    qty=item.qty,
+                    price_at_purchase=p.price
+                )
+                db.session.add(oi)
+        
+        # Clear cart items for this user
+        CartItem.query.filter_by(user_id=user['id']).delete()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Transaction successful',
+            'order_id': f'NEX-{new_order.id}-{random.randint(1000,9999)}',
+            'amount': total,
+            'payment_method': payment_method
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+@app.route('/api/orders', methods=['GET'])
+def get_orders():
+    """Fetch user order history with items and simulated shipping status."""
+    user = get_session_user(request)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    orders = Order.query.filter_by(user_id=user['id']).order_by(Order.created_at.desc()).all()
+    
+    results = []
+    now = datetime.utcnow()
+    
+    for o in orders:
+        # Simulate shipping status progression based on time
+        # Processing -> Shipped (>45s) -> Out for delivery (>90s) -> Delivered (>150s)
+        diff = (now - o.created_at).total_seconds()
+        
+        sim_status = 'processing'
+        if diff > 150: sim_status = 'delivered'
+        elif diff > 90: sim_status = 'out for delivery'
+        elif diff > 45: sim_status = 'shipped'
+        
+        items = OrderItem.query.filter_by(order_id=o.id).all()
+        item_list = []
+        for i in items:
+            item_list.append({
+                'id': i.id,
+                'name': i.product_name,
+                'img': i.product_img,
+                'qty': i.qty,
+                'price': i.price_at_purchase
+            })
+            
+        results.append({
+            'order_id': f'NEX-{o.id}',
+            'date': o.created_at.isoformat(),
+            'total': o.total_amount,
+            'payment_method': o.payment_method,
+            'status': o.status,
+            'shipping_status': sim_status,
+            'items': item_list
+        })
+        
+    return jsonify(results)
 
 @app.route('/api/health')
 def health():

@@ -60,12 +60,34 @@
       .filter(Boolean);
 
     if (resolved.length === 0) {
+      // Ensure header/footer state is correct
+      restoreCartHeader();
+      footerEl.style.display = 'flex';
       renderEmpty(bodyEl, footerEl);
       return;
     }
 
+    // Ensure header/footer state is correct
+    restoreCartHeader();
+    footerEl.style.display = 'flex';
+
     renderItems(bodyEl, resolved);
     renderFooter(footerEl, resolved);
+  }
+  
+  // Helper to reset cart headers to default state
+  function restoreCartHeader() {
+    const titleEl = document.querySelector('.cart-title-wrap h2');
+    const subtitleEl = document.querySelector('.cart-subtitle');
+    const cartItems = window.cart || [];
+    const totalItems = cartItems.reduce((s, e) => s + e.qty, 0);
+
+    if (titleEl) {
+      titleEl.innerHTML = `Shopping Cart <span class="cart-item-count-badge" id="cart-drawer-count">${totalItems}</span>`;
+    }
+    if (subtitleEl) {
+      subtitleEl.textContent = 'Review your selected items';
+    }
   }
 
   // ─── Empty State ───
@@ -218,12 +240,279 @@
     document.getElementById('cart-continue-btn')?.addEventListener('click', closeCartDrawer);
 
     document.getElementById('cart-checkout-btn')?.addEventListener('click', () => {
-      if (typeof showToast === 'function')
-        showToast(
-          'Coming Soon',
-          'Checkout flow is being built — stay tuned!',
-          'fas fa-hammer'
-        );
+      renderCheckoutView();
+    });
+  }
+
+  // ─── Checkout View ───
+  function renderCheckoutView() {
+    const bodyEl = document.getElementById('cart-drawer-body');
+    const footerEl = document.getElementById('cart-drawer-footer');
+    if (!bodyEl || !footerEl) return;
+
+    // Get current total from summary calculation (or recalculate)
+    const cartItems = window.cart || [];
+    const allProducts = window.products || [];
+    const subtotal = cartItems.reduce((s, entry) => {
+      const p = allProducts.find(prod => prod.id === entry.id);
+      return s + (p ? p.price * entry.qty : 0);
+    }, 0);
+    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 29;
+    const tax = Math.round(subtotal * TAX_RATE);
+    const total = subtotal + shipping + tax;
+
+    // Update Header
+    const titleEl = document.querySelector('.cart-title-wrap h2');
+    const subtitleEl = document.querySelector('.cart-subtitle');
+    if (titleEl) titleEl.innerHTML = 'Checkout <span class="cart-item-count-badge">Secure</span>';
+    if (subtitleEl) subtitleEl.textContent = 'Select payment & complete order';
+
+    // Render Body
+    bodyEl.innerHTML = `
+      <div class="checkout-view">
+        <div class="checkout-section">
+          <div class="checkout-section-title">
+            <i class="fas fa-credit-card"></i> Payment Method
+          </div>
+          <div class="payment-methods">
+            <div class="payment-method-card active" data-method="card">
+              <i class="fas fa-credit-card payment-icon"></i>
+              <span class="payment-label">Credit Card</span>
+            </div>
+            <div class="payment-method-card" data-method="paypal">
+              <i class="fab fa-paypal payment-icon"></i>
+              <span class="payment-label">PayPal</span>
+            </div>
+            <div class="payment-method-card" data-method="google">
+              <i class="fab fa-google-pay payment-icon"></i>
+              <span class="payment-label">Google Pay</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="payment-form-container">
+          <!-- Card Form -->
+          <div class="payment-form active" id="form-card">
+            <div class="form-group">
+              <label style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; display:block;">Cardholder Name</label>
+              <input type="text" placeholder="John Doe" id="card-name" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-canvas);">
+            </div>
+            <div class="form-group">
+              <label style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; display:block;">Card Number</label>
+              <input type="text" placeholder="#### #### #### ####" id="card-num" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-canvas);">
+            </div>
+            <div class="expiry-cvv">
+              <div class="form-group">
+                <label style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; display:block;">Expiry</label>
+                <input type="text" placeholder="MM/YY" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-canvas);">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; display:block;">CVV</label>
+                <input type="text" placeholder="***" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-canvas);">
+              </div>
+            </div>
+          </div>
+
+          <!-- PayPal / Google Pay (Simulated simple view) -->
+          <div class="payment-form" id="form-simple">
+            <div style="background:var(--bg-glass); border:1px dashed var(--border); padding:20px; border-radius:12px; text-align:center;">
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                You will be redirected to complete the payment after clicking "Pay Now".
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Render Footer
+    footerEl.innerHTML = `
+      <div class="cart-summary" style="margin-bottom:12px;">
+        <div class="cart-summary-row total">
+          <span>Order Total</span>
+          <span class="summary-value">${fmtPrice(total)}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary cart-checkout-btn" id="pay-now-btn" style="background:linear-gradient(135deg, #22c55e 0%, #10b981 100%); box-shadow:0 10px 20px rgba(34, 197, 94, 0.2);">
+        <i class="fas fa-shield-alt"></i> Pay Now
+      </button>
+      <button class="btn btn-outline" id="back-to-cart-btn" style="width:100%; padding:11px; font-size:0.85rem; border:none; color:var(--text-muted);">
+        <i class="fas fa-chevron-left"></i> Back to Cart
+      </button>
+    `;
+
+    // Wire up events
+    bindCheckoutEvents();
+  }
+
+  function bindCheckoutEvents() {
+    const cards = document.querySelectorAll('.payment-method-card');
+    const forms = {
+      card: document.getElementById('form-card'),
+      simple: document.getElementById('form-simple')
+    };
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        cards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        
+        const method = card.dataset.method;
+        if (method === 'card') {
+          forms.card.classList.add('active');
+          forms.simple.classList.remove('active');
+        } else {
+          forms.card.classList.remove('active');
+          forms.simple.classList.add('active');
+        }
+      });
+    });
+
+    document.getElementById('back-to-cart-btn')?.addEventListener('click', () => {
+      // Restore header
+      const titleEl = document.querySelector('.cart-title-wrap h2');
+      const subtitleEl = document.querySelector('.cart-subtitle');
+      if (titleEl) titleEl.innerHTML = 'Shopping Cart <span class="cart-item-count-badge" id="cart-drawer-count">0</span>';
+      if (subtitleEl) subtitleEl.textContent = 'Review your selected items';
+      
+      renderCartDrawer();
+    });
+
+    document.getElementById('pay-now-btn')?.addEventListener('click', processSimulatedTransaction);
+  }
+
+  function processSimulatedTransaction() {
+    const drawer = document.getElementById('cart-drawer');
+    
+    // Get selected payment method
+    const activeCard = document.querySelector('.payment-method-card.active');
+    const paymentMethod = activeCard ? activeCard.querySelector('.payment-label').textContent : 'Credit Card';
+
+    // Create and show processing overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'processing-overlay';
+    overlay.innerHTML = `
+      <div class="spinner"></div>
+      <h3 style="margin:0; font-weight:700;">Processing Transaction</h3>
+      <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Securely communicating with backend...</p>
+    `;
+    drawer.appendChild(overlay);
+
+    // Call Backend API
+    if (typeof authFetch === 'function') {
+      authFetch(`${_apiBase()}/api/checkout`, {
+        method: 'POST',
+        body: JSON.stringify({ payment_method: paymentMethod })
+      })
+      .then(async (res) => {
+        const data = await res.json();
+        overlay.remove();
+        
+        if (res.ok) {
+          renderSuccessView(data.order_id);
+          // Update cart state locally
+          (window.cart || []).splice(0);
+          if (typeof window.updateCartCount === 'function') window.updateCartCount();
+        } else {
+          renderErrorView(data.error || 'Transaction failed. Please try again.');
+        }
+      })
+      .catch((err) => {
+        console.error('[Checkout] Error:', err);
+        overlay.remove();
+        renderErrorView('Connection error. Please check your network.');
+      });
+    } else {
+      // Fallback for safety (shouldn't happen with authFetch exists)
+      overlay.remove();
+      renderErrorView('Authentication service unavailable.');
+    }
+  }
+
+  function renderErrorView(message) {
+    const bodyEl = document.getElementById('cart-drawer-body');
+    const footerEl = document.getElementById('cart-drawer-footer');
+    
+    footerEl.style.display = 'none';
+    
+    // Update Header
+    const titleEl = document.querySelector('.cart-title-wrap h2');
+    const subtitleEl = document.querySelector('.cart-subtitle');
+    if (titleEl) titleEl.innerHTML = 'Payment Failed';
+    if (subtitleEl) subtitleEl.textContent = 'Action Required';
+
+    bodyEl.innerHTML = `
+      <div class="error-view">
+        <div class="error-icon-wrap">
+          <i class="fas fa-times"></i>
+        </div>
+        <h2>Transaction Error</h2>
+        <p>We encountered an issue while processing your payment.</p>
+        <div class="error-msg-box">
+          <i class="fas fa-exclamation-circle"></i> ${message}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:20px;">
+          <button class="btn btn-primary" id="error-retry-btn">
+            Try Again
+          </button>
+          <button class="btn btn-outline" id="error-back-btn">
+            Return to Cart
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('error-retry-btn')?.addEventListener('click', () => {
+      footerEl.style.display = 'flex';
+      renderCheckoutView();
+    });
+
+    document.getElementById('error-back-btn')?.addEventListener('click', () => {
+      footerEl.style.display = 'flex';
+      renderCartDrawer();
+    });
+  }
+
+  function renderSuccessView(orderId) {
+    const bodyEl = document.getElementById('cart-drawer-body');
+    const footerEl = document.getElementById('cart-drawer-footer');
+    
+    // Hide footer
+    footerEl.style.display = 'none';
+    
+    // Update Header
+    const titleEl = document.querySelector('.cart-title-wrap h2');
+    const subtitleEl = document.querySelector('.cart-subtitle');
+    if (titleEl) titleEl.innerHTML = 'Confirmed';
+    if (subtitleEl) subtitleEl.textContent = 'Order successful';
+
+    const finalOrderNum = orderId || ('NEX-' + Math.floor(100000 + Math.random() * 900000));
+
+    bodyEl.innerHTML = `
+      <div class="success-view">
+        <div class="success-icon-wrap">
+          <i class="fas fa-check"></i>
+        </div>
+        <h2>Success!</h2>
+        <p>Your transaction has been processed successfully. A confirmation email has been sent.</p>
+        <div style="margin-top:10px;">
+          <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">ORDER NUMBER</span>
+          <span class="order-number">${finalOrderNum}</span>
+        </div>
+        <button class="btn btn-primary" id="success-done-btn" style="width:100%; margin-top:20px;">
+          Continue Shopping
+        </button>
+      </div>
+    `;
+
+    document.getElementById('success-done-btn')?.addEventListener('click', () => {
+      // Reset everything for next time
+      footerEl.style.display = 'flex';
+      closeCartDrawer();
+      setTimeout(() => {
+        // Re-render empty cart state so it's ready when opened again
+        renderCartDrawer();
+      }, 500);
     });
   }
 

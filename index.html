@@ -77,6 +77,9 @@
         <i class="fas fa-shopping-cart"></i>
         <span class="cart-count">0</span>
       </button>
+      <button class="btn btn-icon" id="orders-nav-btn" style="display:none;" aria-label="My Orders" title="My Orders">
+        <i class="fas fa-box"></i>
+      </button>
       <button class="btn btn-icon" id="admin-dashboard-btn" style="display:none;" aria-label="Admin Dashboard" title="Admin Dashboard">
         <i class="fas fa-users-cog"></i>
       </button>
@@ -371,6 +374,45 @@
           <!-- Populated by JS -->
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     USER DASHBOARD MODAL
+     (Order History & Shipping)
+═══════════════════════════════ -->
+<div class="auth-modal" id="user-dashboard-modal" aria-hidden="true">
+  <div class="auth-modal-backdrop" id="user-dashboard-backdrop"></div>
+  <div class="auth-modal-content dashboard-modal-content">
+    <button class="auth-close-btn" id="user-dashboard-close" aria-label="Close dashboard"><i class="fas fa-times"></i></button>
+    
+    <div class="auth-header dashboard-header">
+      <div class="dashboard-icon-wrap"><i class="fas fa-chart-line"></i></div>
+      <div class="dashboard-title-group">
+        <h3 class="auth-title">My Dashboard</h3>
+        <p class="auth-subtitle">Track your orders and manage your account.</p>
+      </div>
+    </div>
+
+    <div class="dashboard-tabs">
+      <button class="dashboard-tab active" data-tab="orders">
+        <i class="fas fa-box"></i> Order History
+      </button>
+      <button class="dashboard-tab" data-tab="profile" disabled style="opacity:0.5; cursor:not-allowed;">
+        <i class="fas fa-user-gear"></i> Account Settings
+      </button>
+    </div>
+
+    <div class="dashboard-view active" id="view-orders">
+      <div class="orders-list-scroll">
+        <div id="orders-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -129,6 +129,7 @@ function closeAuthModal() {
 function updateAuthUI() {
   const signInBtn = document.querySelector('#sign-in-btn');
   const adminDashboardBtn = document.querySelector('#admin-dashboard-btn');
+  const ordersNavBtn = document.querySelector('#orders-nav-btn');
   if (!signInBtn) return;
   
   if (currentUser) {
@@ -139,10 +140,12 @@ function updateAuthUI() {
 
     if (currentUser.role === 'admin') {
       if (adminDashboardBtn) adminDashboardBtn.style.display = 'inline-flex';
+      if (ordersNavBtn) ordersNavBtn.style.display = 'inline-flex';
       document.querySelector('#drop-admin').style.display = 'flex';
-      document.querySelector('#drop-dashboard').style.display = 'none';
+      document.querySelector('#drop-dashboard').style.display = 'flex';
     } else {
       if (adminDashboardBtn) adminDashboardBtn.style.display = 'none';
+      if (ordersNavBtn) ordersNavBtn.style.display = 'inline-flex';
       document.querySelector('#drop-admin').style.display = 'none';
       document.querySelector('#drop-dashboard').style.display = 'flex';
     }
@@ -152,6 +155,7 @@ function updateAuthUI() {
     signInBtn.classList.remove('btn-outline');
     signInBtn.title = 'Sign In';
     if (adminDashboardBtn) adminDashboardBtn.style.display = 'none';
+    if (ordersNavBtn) ordersNavBtn.style.display = 'none';
     
     // Hide dropdown items if logged out
     document.querySelector('#drop-admin').style.display = 'none';
@@ -400,6 +404,146 @@ function initAuth() {
     e.preventDefault();
     openAdminDashboard();
   });
+
+  document.querySelector('#drop-dashboard')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openUserDashboard();
+  });
+
+  document.querySelector('#orders-nav-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openUserDashboard();
+  });
+
+  // User Dashboard Closing
+  document.querySelector('#user-dashboard-close')?.addEventListener('click', closeUserDashboard);
+  document.querySelector('#user-dashboard-backdrop')?.addEventListener('click', closeUserDashboard);
+}
+
+// ─── User Dashboard (Order History) ───
+function openUserDashboard() {
+  const modal = document.querySelector('#user-dashboard-modal');
+  if (modal) {
+    renderUserDashboard();
+    modal.classList.add('open');
+  }
+}
+
+function closeUserDashboard() {
+  const modal = document.querySelector('#user-dashboard-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function renderUserDashboard() {
+  const container = document.querySelector('#orders-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:50px; text-align:center; gap:15px;">
+      <div class="spinner" style="width:40px; height:40px; border-width:3px;"></div>
+      <p style="color:var(--text-muted); font-size:0.9rem;">Fetching your order history...</p>
+    </div>
+  `;
+
+  try {
+    const resp = await authFetch(`${API_URL}/api/orders`);
+    if (!resp.ok) throw new Error('Failed to fetch orders');
+    
+    const orders = await resp.json();
+    
+    if (orders.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:60px 20px;">
+          <div style="font-size:3rem; color:var(--text-muted); opacity:0.2; margin-bottom:15px;"><i class="fas fa-box-open"></i></div>
+          <h3 style="color:var(--text-secondary); margin-bottom:8px;">No orders found</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">You haven't placed any orders yet. Start shopping to see them here!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = orders.map(order => renderOrderCard(order)).join('');
+    
+    // Wire up "View Items" toggles
+    container.querySelectorAll('.view-items-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const orderId = btn.dataset.orderId;
+        const details = document.getElementById(`items-${orderId}`);
+        const isOpening = !details.classList.contains('open');
+        
+        details.classList.toggle('open');
+        btn.innerHTML = isOpening 
+          ? `<i class="fas fa-chevron-up"></i> Hide Items`
+          : `<i class="fas fa-chevron-down"></i> View Items`;
+      });
+    });
+
+  } catch (err) {
+    console.error('[Dashboard] Error:', err);
+    container.innerHTML = `
+      <div style="text-align:center; padding:60px 20px;">
+        <div style="font-size:3rem; color:#ef4444; opacity:0.2; margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3 style="color:#ef4444; margin-bottom:8px;">Couldn't load orders</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Please check your connection and try again.</p>
+        <button class="btn btn-outline" style="margin-top:15px;" onclick="renderUserDashboard()">Retry</button>
+      </div>
+    `;
+  }
+}
+
+function renderOrderCard(order) {
+  const dateStr = new Date(order.date).toLocaleDateString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const statusClass = order.shipping_status.replace(/\s+/g, '-').toLowerCase();
+  const statusIcon = {
+    'processing': 'fa-sync fa-spin',
+    'shipped': 'fa-truck-fast',
+    'out for delivery': 'fa-house-chimney-window',
+    'delivered': 'fa-circle-check'
+  }[order.shipping_status.toLowerCase()] || 'fa-box';
+
+  return `
+    <div class="order-card">
+      <div class="order-card-header">
+        <div class="order-meta-info">
+          <h4>Order ${order.order_id}</h4>
+          <span class="order-date"><i class="far fa-calendar-alt"></i> ${dateStr}</span>
+        </div>
+        <div class="order-status-group">
+          <span class="ship-status-badge status-${statusClass}">
+            <i class="fas ${statusIcon}"></i> ${order.shipping_status}
+          </span>
+          <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">
+            Payment: ${order.payment_method}
+          </span>
+        </div>
+      </div>
+      
+      <div class="order-summary-row">
+        <div style="display:flex; gap:8px;">
+          <button class="view-items-btn" data-order-id="${order.order_id.replace('-', '')}">
+            <i class="fas fa-chevron-down"></i> View Items (${order.items.length})
+          </button>
+        </div>
+        <div class="order-total-price">$${order.total.toLocaleString()}</div>
+      </div>
+
+      <div class="order-items-details" id="items-${order.order_id.replace('-', '')}">
+        ${order.items.map(item => `
+          <div class="purchased-item">
+            <img src="${item.img}" class="purchased-item-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect width=%2250%22 height=%2250%22 fill=%22%23242630%22/%3E%3C/svg%3E'">
+            <div class="purchased-item-info">
+              <div class="purchased-item-name">${item.name}</div>
+              <div class="purchased-item-meta">Qty: ${item.qty} × $${item.price.toLocaleString()}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 }
 
 // ─── Admin Dashboard Logic ───
